@@ -1,11 +1,11 @@
 <controls>
     <SliderInt_First_Col_Thresh>
         <name>First Col Thresh</name>
-        <value>24</value>
+        <value>36</value>
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>8</value>
+        <value>9</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
