@@ -24,6 +24,8 @@ void testApp::setup() {
     grayImage.allocate(camWidth, camHeight);
     grayImageDiff.allocate(camWidth, camHeight);
     meanGrayImage.allocate(camWidth, camHeight);
+    temp_depth.allocate(kinect.width, kinect.height);
+    temp_scale.allocate(camWidth, camHeight);
     
     edge.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
     warpedColImg.allocate(camWidth, camHeight);
@@ -112,7 +114,7 @@ void testApp::update() {
                 
             case Main:
                 if(configured) {
-                    grayImage.absDiff(grayImageDiff);
+//                    grayImage.absDiff(grayImageDiff);
                     ThresholdImages();
                     
                     if (saveBk)
@@ -159,14 +161,15 @@ void testApp::update() {
                     if(contours.nBlobs > 0) {
                         if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
                             SendMessage("/checkColor");
+                            ofLogNotice("Blob found");
                             timeSinceLastSend = ofGetElapsedTimef();
                         }
-                    }
-                    
-                    if(whiteScreen) {
-                        colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
-                        ofxCvBlob blob = contours.blobs.at(0);
-                        checkForColor(colImgNoCont, blob.centroid.x, blob.centroid.y);
+              
+                        if(whiteScreen) {
+                            ofxCvBlob blob = contours.blobs.at(0);
+                            checkForColor(warpedColImg, blob.centroid.x, blob.centroid.y);
+                            whiteScreen = false;
+                        }
                     }
                     
                     //                    if(receiver.hasWaitingMessages()){
@@ -198,29 +201,34 @@ void testApp::update() {
 //--------------------------------------------------------------
 void testApp::UpdateImages() {
     colImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height);
+
     warpedColImg.scaleIntoMe(colImg);
-    //warpedColImg.warpIntoMe(colImg, src, dest);
+    temp_color.setFromPixels(warpedColImg.getPixelsRef());
+    warpedColImg.warpIntoMe(temp_color, dest, src);
     
     //    depthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-    ofxCvGrayscaleImage temp_depth;
-    temp_depth.allocate(kinect.width, kinect.height);
     temp_depth.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-    
-    grayImage.warpIntoMe(temp_depth, src, dest); //Temp stuff. Gotta clean it up
+    temp_scale.scaleIntoMe(temp_depth);
+    grayImage.warpIntoMe(temp_scale, src, dest); //Temp stuff. Gotta clean it up
     //    grayImage.blur(3);
 }
 
 //--------------------------------------------------------------
 void testApp::ThresholdImages() {
-    //depthImage.absDiff(depthImageDiff);
+    grayImage.absDiff(grayImageDiff);
     unsigned char* grayPixels = grayImage.getPixels();
+    unsigned char* colorPixels = warpedColImg.getPixels();
+    colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
     for (int i = 0, n = grayImage.getWidth() * grayImage.getHeight(); i < n; i++) {
         if(ofInRange(grayPixels[i], depthThresh, depthThresh+range)){
             grayPixels[i] = 255;
         }else{
             grayPixels[i] = 0;
+            colorPixels[i*3] = colorPixels[i*3+1] = colorPixels[i*3+2] = 0;
         }
     }
+    grayImage = grayPixels;
+    warpedColImg = colorPixels;
 }
 
 //--------------------------------------------------------------
@@ -291,12 +299,12 @@ void testApp::ConfigureScreen() {
             dest[1] = ofPoint(rect.x + rect.width, rect.y);
             dest[2] = ofPoint(rect.x + rect.width, rect.y + rect.height);
             dest[3] = ofPoint(rect.x, rect.y + rect.height);
+            
             ofxXmlSettings settings;
             settings.addTag("positions");
             settings.pushTag("positions");
             for(int i = 0; i < 4; i++){
-              dest[i] = ofxCv::toOf(corners[i]);
-              ofLogNotice("WRITING THIS CORNER:  " + ofToString(i)); 
+              //dest[i] = ofxCv::toOf(corners[i]);
               if(dest[i].x != -1 && dest[i].y != -1){
                 settings.addTag("position");
                 settings.pushTag("position", i);
@@ -307,10 +315,12 @@ void testApp::ConfigureScreen() {
             }
             settings.popTag();
             settings.saveFile("points.xml");
+           
             SendMessage("/config/cornerParsed");
             state = ConfigBackground;
         } else {
-            // Get mass center
+          ofLogNotice("Hough Worked");  
+          // Get mass center
             cv::Point2f center(0,0);
             for (int i = 0; i < corners.size(); i++)
                 center += corners[i];
@@ -335,7 +345,6 @@ void testApp::ConfigureScreen() {
             settings.pushTag("positions");
             for(int i = 0; i < 4; i++){
               dest[i] = ofxCv::toOf(corners[i]);
-              ofLogNotice("WRITING THIS CORNER:  " + ofToString(i)); 
               if(dest[i].x != -1 && dest[i].y != -1){
                 settings.addTag("position");
                 settings.pushTag("position", i);
@@ -374,12 +383,7 @@ void testApp::checkForColor(ofxCvColorImage imageInQuestion, float x, float y){
         if(colorContourFinder.size() > 0){
             ofLogNotice("PLAYER FOUND: " + ofToString(i));
             players[i].ballFound = true;
-            ofxOscMessage m;
-            m.setAddress("/shoot");
-            m.addFloatArg(x);
-            m.addFloatArg(y);
-            m.addIntArg(i);
-            sender.sendMessage(m);
+            SendHitMessage(ofPoint(x,y), i);
         }
     }
 }

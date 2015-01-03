@@ -5,11 +5,11 @@
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>80</value>
+        <value>49</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>20</value>
+        <value>15</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
@@ -37,6 +37,6 @@
     </Toggle_Save_Background>
     <Toggle_Flip>
         <name>Flip</name>
-        <value>0</value>
+        <value>1</value>
     </Toggle_Flip>
 </controls>

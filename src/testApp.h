@@ -62,10 +62,10 @@ private:
     
     ofxKinect kinect;
     
-    ofxCvGrayscaleImage grayImageDiff, grayImage;
+    ofxCvGrayscaleImage grayImageDiff, grayImage, temp_depth, temp_scale;
     ofxCvGrayscaleImage meanGrayImage;
     
-    ofxCvColorImage colImgNoCont, colImg, warpedColImg;
+    ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color;
     
     ofImage edge; // TEMP
     
