@@ -5,7 +5,7 @@
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>49</value>
+        <value>128</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>

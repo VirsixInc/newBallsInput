@@ -209,7 +209,7 @@ void testApp::UpdateImages() {
     //    depthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     temp_depth.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     temp_scale.scaleIntoMe(temp_depth);
-    grayImage.warpIntoMe(temp_scale, src, dest); //Temp stuff. Gotta clean it up
+    grayImage.warpIntoMe(temp_scale, dest, src); //Temp stuff. Gotta clean it up
     //    grayImage.blur(3);
 }
 
@@ -251,6 +251,7 @@ void testApp::ConfigureScreen() {
     }
     
     if(timer > 20) { //Delay to let front end change scenes
+      /*
         vector<cv::Vec4i> lines;
         
         cv::Rect rect = colorContourFinder.getBoundingRect(0);
@@ -288,17 +289,20 @@ void testApp::ConfigureScreen() {
         }
         
         std::vector<cv::Point2f> approx;
-        
         if(corners.size() > 0) {
             cv::approxPolyDP(cv::Mat(corners), approx, cv::arcLength(cv::Mat(corners), true) * 0.02, true);
         }
         
         if (approx.size() != 4) {
             std::cout << "Hough Lines didnt work " + ofToString(approx.size()) << std::endl;
-            dest[0] = ofPoint(rect.x, rect.y);
-            dest[1] = ofPoint(rect.x + rect.width, rect.y);
-            dest[2] = ofPoint(rect.x + rect.width, rect.y + rect.height);
-            dest[3] = ofPoint(rect.x, rect.y + rect.height);
+            */
+            const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
+            get_corners(contPts, &contCorners);
+
+            dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
+            dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
+            dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
+            dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
             
             ofxXmlSettings settings;
             settings.addTag("positions");
@@ -318,6 +322,7 @@ void testApp::ConfigureScreen() {
            
             SendMessage("/config/cornerParsed");
             state = ConfigBackground;
+            /*
         } else {
           ofLogNotice("Hough Worked");  
           // Get mass center
@@ -339,6 +344,13 @@ void testApp::ConfigureScreen() {
             
             corners[3].x += box[1].x - 4;
             corners[3].y += box[1].y - 4;
+            const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
+            get_corners(contPts, &contCorners);
+
+            dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
+            dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
+            dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
+            dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
             
             ofxXmlSettings settings;
             settings.addTag("positions");
@@ -360,7 +372,7 @@ void testApp::ConfigureScreen() {
             state = ConfigBackground;
             
             timer = 0;
-        }
+        }*/
         
         // Get depth
         depthThresh = 0;
@@ -440,7 +452,7 @@ void testApp::draw() {
     for(int i = 0;i < amtOfPlayers;i++){
         ofSetColor(255,255,255);
         ofSetColor(players[i].ballColor);
-        ofCircle(camWidth+50*i, camHeight+100, 30);
+        ofCircle(camWidth+50*i, 2*camHeight+100, 30);
     }
 }
 

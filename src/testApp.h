@@ -8,6 +8,7 @@
 #include "ofxXmlSettings.h"
 #include "ofxMSAInteractiveObject.h"
 #include "ofxSimpleGuiToo.h"
+#include "corners.h"
 
 struct ballPlayer{
     int vote;
@@ -50,6 +51,8 @@ private:
     
     cv::Point2f ComputeIntersect(cv::Vec4i a, cv::Vec4i b);
     void SortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center);
+
+    Corners contCorners;
     
     State state;
     float threshold;
