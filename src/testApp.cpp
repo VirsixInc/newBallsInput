@@ -251,128 +251,32 @@ void testApp::ConfigureScreen() {
     }
     
     if(timer > 20) { //Delay to let front end change scenes
-      /*
-        vector<cv::Vec4i> lines;
-        
-        cv::Rect rect = colorContourFinder.getBoundingRect(0);
-        
-        ofPoint box[4];
-        box[0] = ofPoint(rect.x - 4, rect.y - 4);
-        box[1] = ofPoint(rect.x + rect.width + 4, rect.y - 4);
-        box[2] = ofPoint(rect.x + rect.width + 4, rect.y + rect.height + 4);
-        box[3] = ofPoint(rect.x - 4, rect.y + rect.height + 4);
-        
-        
-        ofImage cropped;
-        cropped.setFromPixels(colImg.getPixelsRef());
-        cropped.crop(rect.x - 4, rect.y - 4, rect.width + 8, rect.height + 8);
-        cropped.update();
-        
-        ofPixels gray;
-        ofxCv::convertColor(cropped, gray, CV_RGB2GRAY);
-        
-        ofxCv::blur(gray, 5);
-        
-        ofxCv::Canny(gray, edge, 100, 100);
-        edge.update();
-        
-        cv::HoughLinesP(ofxCv::toCv(edge), lines, 1, CV_PI/180, 70, 150, 10); //TODO fiiiiix
-        ofLogNotice("Lines: " + ofToString(lines.size()));
-        
-        std::vector<cv::Point2f> corners;
-        for (int i = 0; i < lines.size(); i++) {
-            for (int j = i+1; j < lines.size(); j++) {
-                cv::Point2f pt = ComputeIntersect(lines[i], lines[j]);
-                if (pt.x >= 0 && pt.y >= 0)
-                    corners.push_back(pt);
-            }
-        }
-        
-        std::vector<cv::Point2f> approx;
-        if(corners.size() > 0) {
-            cv::approxPolyDP(cv::Mat(corners), approx, cv::arcLength(cv::Mat(corners), true) * 0.02, true);
-        }
-        
-        if (approx.size() != 4) {
-            std::cout << "Hough Lines didnt work " + ofToString(approx.size()) << std::endl;
-            */
-            const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
-            get_corners(contPts, &contCorners);
+        const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
+        get_corners(contPts, &contCorners);
 
-            dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
-            dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
-            dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
-            dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
-            
-            ofxXmlSettings settings;
-            settings.addTag("positions");
-            settings.pushTag("positions");
-            for(int i = 0; i < 4; i++){
-              //dest[i] = ofxCv::toOf(corners[i]);
-              if(dest[i].x != -1 && dest[i].y != -1){
-                settings.addTag("position");
-                settings.pushTag("position", i);
-                settings.setValue("X", dest[i].x);
-                settings.setValue("Y", dest[i].y);
-                settings.popTag();
-              }
-            }
+        dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
+        dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
+        dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
+        dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
+        
+        ofxXmlSettings settings;
+        settings.addTag("positions");
+        settings.pushTag("positions");
+        for(int i = 0; i < 4; i++){
+          //dest[i] = ofxCv::toOf(corners[i]);
+          if(dest[i].x != -1 && dest[i].y != -1){
+            settings.addTag("position");
+            settings.pushTag("position", i);
+            settings.setValue("X", dest[i].x);
+            settings.setValue("Y", dest[i].y);
             settings.popTag();
-            settings.saveFile("points.xml");
-           
-            SendMessage("/config/cornerParsed");
-            state = ConfigBackground;
-            /*
-        } else {
-          ofLogNotice("Hough Worked");  
-          // Get mass center
-            cv::Point2f center(0,0);
-            for (int i = 0; i < corners.size(); i++)
-                center += corners[i];
-            
-            center *= (1. / corners.size());
-            SortCorners(corners, center);
-            
-            corners[0].x += box[0].x + 4; //TODO make sure this works
-            corners[0].y += box[0].y + 4;
-            
-            corners[1].x += box[1].x - 4;
-            corners[1].y += box[1].y + 4;
-            
-            corners[2].x += box[1].x + 4;
-            corners[2].y += box[1].y - 4;
-            
-            corners[3].x += box[1].x - 4;
-            corners[3].y += box[1].y - 4;
-            const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
-            get_corners(contPts, &contCorners);
-
-            dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
-            dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
-            dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
-            dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
-            
-            ofxXmlSettings settings;
-            settings.addTag("positions");
-            settings.pushTag("positions");
-            for(int i = 0; i < 4; i++){
-              dest[i] = ofxCv::toOf(corners[i]);
-              if(dest[i].x != -1 && dest[i].y != -1){
-                settings.addTag("position");
-                settings.pushTag("position", i);
-                settings.setValue("X", dest[i].x);
-                settings.setValue("Y", dest[i].y);
-                settings.popTag();
-              }
-            }
-            settings.popTag();
-            settings.saveFile("points.xml");
-
-            SendMessage("/config/cornerParsed");
-            state = ConfigBackground;
-            
-            timer = 0;
-        }*/
+          }
+        }
+        settings.popTag();
+        settings.saveFile("points.xml");
+       
+        SendMessage("/config/cornerParsed");
+        state = ConfigBackground;
         
         // Get depth
         depthThresh = 0;
@@ -388,6 +292,7 @@ void testApp::ConfigureScreen() {
     }
 }
 
+//--------------------------------------------------------------
 void testApp::checkForColor(ofxCvColorImage imageInQuestion, float x, float y){
     for(int i = 0;i<4;i++){
         colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
@@ -399,6 +304,7 @@ void testApp::checkForColor(ofxCvColorImage imageInQuestion, float x, float y){
         }
     }
 }
+
 //--------------------------------------------------------------
 void testApp::draw() {
     ofSetHexColor(0xff0000);
@@ -473,42 +379,6 @@ void testApp::CheckOSCMessage() {
             }
         }
     }
-}
-
-cv::Point2f testApp::ComputeIntersect(cv::Vec4i a, cv::Vec4i b) {
-    int x1 = a[0], y1 = a[1], x2 = a[2], y2 = a[3];
-    int x3 = b[0], y3 = b[1], x4 = b[2], y4 = b[3];
-    
-    if (float d = ((float)(x1-x2) * (y3-y4)) - ((y1-y2) * (x3-x4))) {
-        cv::Point2f pt;
-        pt.x = ((x1*y2 - y1*x2) * (x3-x4) - (x1-x2) * (x3*y4 - y3*x4)) / d;
-        pt.y = ((x1*y2 - y1*x2) * (y3-y4) - (y1-y2) * (x3*y4 - y3*x4)) / d;
-        return pt;
-    }
-    else
-        return cv::Point2f(-1, -1);
-}
-
-void testApp::SortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center) {
-    std::vector<cv::Point2f> top, bot;
-    
-    for (int i = 0; i < corners.size(); i++) {
-        if (corners[i].y < center.y)
-            top.push_back(corners[i]);
-        else
-            bot.push_back(corners[i]);
-    }
-    
-    cv::Point2f tl = top[0].x > top[1].x ? top[1] : top[0];
-    cv::Point2f tr = top[0].x > top[1].x ? top[0] : top[1];
-    cv::Point2f bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
-    cv::Point2f br = bot[0].x > bot[1].x ? bot[0] : bot[1];
-    
-    corners.clear();
-    corners.push_back(tl);
-    corners.push_back(tr);
-    corners.push_back(bl);
-    corners.push_back(br);
 }
 
 //--------------------------------------------------------------
