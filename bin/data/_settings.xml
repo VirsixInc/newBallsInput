@@ -5,16 +5,12 @@
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>9</value>
+        <value>80</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
         <value>20</value>
     </SliderInt_Range>
-    <SliderInt_Kin_Angle>
-        <name>Kin Angle</name>
-        <value>29</value>
-    </SliderInt_Kin_Angle>
     <SliderInt_minContArea>
         <name>minContArea</name>
         <value>20</value>
@@ -31,20 +27,16 @@
         <name>Color Configured</name>
         <value>1</value>
     </Toggle_Color_Configured>
-    <Toggle_Save_Points>
-        <name>Save Points</name>
-        <value>0</value>
-    </Toggle_Save_Points>
     <Toggle_Disable_Timer>
         <name>Disable Timer</name>
         <value>1</value>
     </Toggle_Disable_Timer>
-    <Toggle_Reset_Pts>
-        <name>Reset Pts</name>
-        <value>0</value>
-    </Toggle_Reset_Pts>
     <Toggle_Save_Background>
         <name>Save Background</name>
         <value>0</value>
     </Toggle_Save_Background>
+    <Toggle_Flip>
+        <name>Flip</name>
+        <value>0</value>
+    </Toggle_Flip>
 </controls>

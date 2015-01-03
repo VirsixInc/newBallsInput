@@ -25,7 +25,7 @@ void testApp::setup() {
     grayImageDiff.allocate(camWidth, camHeight);
     meanGrayImage.allocate(camWidth, camHeight);
     
-    edge.allocate(kinect.width, kinect.height, OF_IMAGE_GRAYSCALE);
+    edge.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
     warpedColImg.allocate(camWidth, camHeight);
     colImgNoCont.allocate(camWidth, camHeight);
     
@@ -33,13 +33,13 @@ void testApp::setup() {
     
     src[0] = ofPoint(0,0);
     src[1] = ofPoint(camWidth,0);
-    src[2] = ofPoint(0,camHeight);
-    src[3] = ofPoint(camWidth,camHeight);
+    src[2] = ofPoint(camWidth,camHeight);
+    src[3] = ofPoint(0,camHeight);
     
     dest[0] = ofPoint(0,0);
     dest[1] = ofPoint(camWidth,0);
-    dest[2] = ofPoint(0,camHeight);
-    dest[3] = ofPoint(camWidth,camHeight);
+    dest[2] = ofPoint(camWidth,camHeight);
+    dest[3] = ofPoint(0,camHeight);
     
     state = ConfigBackground;
     timer = 0;
@@ -198,7 +198,8 @@ void testApp::update() {
 //--------------------------------------------------------------
 void testApp::UpdateImages() {
     colImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height);
-    warpedColImg.warpIntoMe(colImg, src, dest);
+    warpedColImg.scaleIntoMe(colImg);
+    //warpedColImg.warpIntoMe(colImg, src, dest);
     
     //    depthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     ofxCvGrayscaleImage temp_depth;
@@ -226,10 +227,10 @@ void testApp::ThresholdImages() {
 void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
-    colorContourFinder.setMinArea(800); // TODO tweak. Seems good tho.
+    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
     colorContourFinder.setThreshold(120); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
-    colorContourFinder.findContours(colImg);
+    colorContourFinder.findContours(warpedColImg);
     
     //TODO cant just give up like this.
     if(colorContourFinder.size() < 1) {
@@ -290,7 +291,22 @@ void testApp::ConfigureScreen() {
             dest[1] = ofPoint(rect.x + rect.width, rect.y);
             dest[2] = ofPoint(rect.x + rect.width, rect.y + rect.height);
             dest[3] = ofPoint(rect.x, rect.y + rect.height);
-            
+            ofxXmlSettings settings;
+            settings.addTag("positions");
+            settings.pushTag("positions");
+            for(int i = 0; i < 4; i++){
+              dest[i] = ofxCv::toOf(corners[i]);
+              ofLogNotice("WRITING THIS CORNER:  " + ofToString(i)); 
+              if(dest[i].x != -1 && dest[i].y != -1){
+                settings.addTag("position");
+                settings.pushTag("position", i);
+                settings.setValue("X", dest[i].x);
+                settings.setValue("Y", dest[i].y);
+                settings.popTag();
+              }
+            }
+            settings.popTag();
+            settings.saveFile("points.xml");
             SendMessage("/config/cornerParsed");
             state = ConfigBackground;
         } else {
@@ -314,9 +330,23 @@ void testApp::ConfigureScreen() {
             corners[3].x += box[1].x - 4;
             corners[3].y += box[1].y - 4;
             
-            for(int i = 0; i < 4; i++)
-                dest[i] = ofxCv::toOf(corners[i]);
-            
+            ofxXmlSettings settings;
+            settings.addTag("positions");
+            settings.pushTag("positions");
+            for(int i = 0; i < 4; i++){
+              dest[i] = ofxCv::toOf(corners[i]);
+              ofLogNotice("WRITING THIS CORNER:  " + ofToString(i)); 
+              if(dest[i].x != -1 && dest[i].y != -1){
+                settings.addTag("position");
+                settings.pushTag("position", i);
+                settings.setValue("X", dest[i].x);
+                settings.setValue("Y", dest[i].y);
+                settings.popTag();
+              }
+            }
+            settings.popTag();
+            settings.saveFile("points.xml");
+
             SendMessage("/config/cornerParsed");
             state = ConfigBackground;
             
@@ -359,7 +389,7 @@ void testApp::draw() {
     
     ofSetColor(255, 255, 255);
     kinect.draw(0,0,camWidth,camHeight);
-    warpedColImg.draw(camWidth, 0, camWidth, camHeight);
+    warpedColImg.draw(0, camHeight*2);
     grayImage.draw(camWidth*2, 0, camWidth, camHeight);
     colImgNoCont.draw(0,camHeight,camWidth,camHeight);
     grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
