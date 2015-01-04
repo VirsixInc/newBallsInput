@@ -47,7 +47,7 @@ private:
     void CheckOSCMessage();
     
     void SendMessage(string message);
-    void SendHitMessage(ofPoint pos, int player);
+    void SendHitMessage(string message, ofPoint pos, int player);
     
     cv::Point2f ComputeIntersect(cv::Vec4i a, cv::Vec4i b);
     void SortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center);

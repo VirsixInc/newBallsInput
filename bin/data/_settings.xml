@@ -5,19 +5,19 @@
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>52</value>
+        <value>8</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>20</value>
+        <value>9</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>0</value>
+        <value>27</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
-        <value>1998</value>
+        <value>330</value>
     </SliderInt_maxContArea>
     <Toggle_Configured>
         <name>Configured</name>

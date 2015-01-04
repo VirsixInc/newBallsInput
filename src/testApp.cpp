@@ -26,6 +26,7 @@ void testApp::setup() {
     meanGrayImage.allocate(camWidth, camHeight);
     temp_depth.allocate(kinect.width, kinect.height);
     temp_scale.allocate(camWidth, camHeight);
+    imgToCheck.allocate(camWidth,camHeight);
     
     edge.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
     warpedColImg.allocate(camWidth, camHeight);
@@ -55,7 +56,7 @@ void testApp::setup() {
     gui.addSlider("First Col Thresh", targetColThresh, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 20);
-    gui.addSlider("minContArea", minContArea, 0, 20);
+    gui.addSlider("minContArea", minContArea, 0, 100);
     gui.addSlider("maxContArea", maxContArea, 0, 2000);
     gui.addToggle("Configured", configured);
     gui.addToggle("Color Configured", colorConfig);
@@ -74,10 +75,12 @@ void testApp::update() {
     kinect.update();
     if(kinect.isFrameNew()) {
         colorContourFinder.setThreshold(targetColThresh);
-        colorContourFinder.setMinAreaRadius(minContArea);
-        colorContourFinder.setMaxAreaRadius(maxContArea);
+        colorContourFinder.setMinArea(minContArea);
+        colorContourFinder.setMaxArea(maxContArea);
         
         UpdateImages();
+        if (saveBk)
+          SaveBackground();
         
         switch(state) {
             case Config:
@@ -88,6 +91,7 @@ void testApp::update() {
                 break;
                 
             case ConfigBackground:
+                /*
               { //Scope-compiler fix
                   unsigned char* oldPixels = meanGrayImage.getPixels();
                   unsigned char* newPixels = grayImage.getPixels();
@@ -96,7 +100,11 @@ void testApp::update() {
                   }
                   meanGrayImage = oldPixels;
               }
+              */
               SaveBackground();
+              SendMessage("/config/done");
+              state = ConfigColors;
+              /*
               timer++;
               if(timer > depthImageAverageTime) {
                   grayImageDiff = meanGrayImage;
@@ -104,6 +112,7 @@ void testApp::update() {
                   state = ConfigColors;
                   timer = 0;
               }
+              */
               ThresholdImages();
               break;
             case ConfigColors:
@@ -114,22 +123,25 @@ void testApp::update() {
             case Main:
               if(configured) {
                 ThresholdImages();
-                if (saveBk)
-                  SaveBackground();
 
                 contours.findContours(grayImage, minContArea, maxContArea, 8, true);
                 if(contours.nBlobs > 0) {
-                  if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
-                    SendMessage("/checkColor");
-                    ofLogNotice("Blob found");
-                    timeSinceLastSend = ofGetElapsedTimef();
-                  }
                   if(whiteScreen) {
                     ofxCvBlob blob = contours.blobs.at(0);
-                    imgToCheck.setFromPixels(warpedColImg.getPixelsRef());
                     //imgToCheck.setROI(blob.boundingRect);
                     checkForColor(imgToCheck, blob.centroid.x, blob.centroid.y);
                     whiteScreen = false;
+                  }
+                  if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
+                    ofxCvBlob blob = contours.blobs.at(0);
+                    ofxCvColorImage tmpColCont;
+                    tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                    tmpColCont.setROI(blob.boundingRect);
+                    imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                    //imgToCheck.drawROI(0,camHeight);
+                    SendHitMessage("/checkColor", ofPoint(contours.blobs.at(0).centroid), 0);
+                    ofLogNotice("Blob found");
+                    timeSinceLastSend = ofGetElapsedTimef();
                   }
                 }
               }
@@ -162,8 +174,8 @@ void testApp::ThresholdImages() {
     unsigned char* colorPixels = warpedColImg.getPixels();
     colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
     for (int i = 0, n = grayImage.getWidth() * grayImage.getHeight(); i < n; i++) {
-        if(ofInRange(grayPixels[i],0,255)){// depthThresh, depthThresh+range)){
-            //grayPixels[i] = 255;
+        if(ofInRange(grayPixels[i],depthThresh,255)){ //depthThresh+range)){
+            grayPixels[i] = 255;
         }else{
             grayPixels[i] = 0;
             colorPixels[i*3] = colorPixels[i*3+1] = colorPixels[i*3+2] = 0;
@@ -221,6 +233,7 @@ void testApp::ConfigureScreen() {
         state = ConfigBackground;
         
         // Get depth
+        /*
         depthThresh = 0;
         
         // Index *should* be right. Hopefully the dest corners arent parsed out by threshold image
@@ -231,6 +244,7 @@ void testApp::ConfigureScreen() {
         
         depthThresh /= 4;
         depthThresh += 15; // A little buffer to account for the screen waving
+        */
     }
 }
 
@@ -242,9 +256,17 @@ void testApp::checkForColor(ofxCvColorImage imageInQuestion, float x, float y){
         if(colorContourFinder.size() > 0){
             ofLogNotice("PLAYER FOUND: " + ofToString(i));
             players[i].ballFound = true;
-            SendHitMessage(ofPoint(x,y), i);
+            SendHitMessage("/shoot", ofPoint(x,y), i);
         }
     }
+}
+//--------------------------------------------------------------
+void testApp::SaveBackground() {
+    saveBk = false;
+    unsigned char* pixels = grayImage.getPixels();
+    grayImageDiff.setFromPixels(pixels, camWidth, camHeight);
+    //timer = 0;
+    //state = ConfigBackground;
 }
 
 //--------------------------------------------------------------
@@ -253,10 +275,13 @@ void testApp::draw() {
     
     ofSetColor(255, 255, 255);
     kinect.draw(0,0,camWidth,camHeight);
-    warpedColImg.draw(0, camHeight*2);
-    grayImage.draw(camWidth*2, 0, camWidth, camHeight);
-    colImgNoCont.draw(0,camHeight,camWidth,camHeight);
+    imgToCheck.draw(0, camHeight, camWidth, camHeight);
+    warpedColImg.draw(camWidth*2,0);
+    colImgNoCont.draw(camWidth*2,camHeight,camWidth,camHeight);
+
+    grayImage.draw(camWidth, 0, camWidth, camHeight);
     grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
+
     if(configured){
         colorContourFinder.draw();
         contours.draw();
@@ -331,12 +356,12 @@ void testApp::SendMessage(string message) {
 }
 
 //--------------------------------------------------------------
-void testApp::SendHitMessage(ofPoint pos, int player) {
+void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     if (player == -1)
         return;
     
     ofxOscMessage m;
-    m.setAddress("/shoot");
+    m.setAddress(message);
     float x = pos.x / camWidth;
     float y = pos.y / camHeight;
     if(flip) {
@@ -352,24 +377,8 @@ void testApp::SendHitMessage(ofPoint pos, int player) {
                 + ofToString(x) + "   Y:"
                 + ofToString(y));
     timeSinceLastSend = ofGetElapsedTimef();
-    
-    //    sentMessage message;
-    //    message.pos = pos;
-    //    message.timeToRemove = timeSinceLastSend + 0.5f;
-    //    sentMessages.push_back(message);
 }
 
-//--------------------------------------------------------------
-void testApp::SaveBackground() {
-    saveBk = false;
-    unsigned char* pixels = grayImageDiff.getPixels();
-    for(int i = 0; i < camWidth * camHeight; i++) {
-        pixels[i] = 0;
-    }
-    grayImageDiff.setFromPixels(pixels, camWidth, camHeight);
-    timer = 0;
-    state = ConfigBackground;
-}
 
 //--------------------------------------------------------------
 void testApp::exit() {
