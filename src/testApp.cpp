@@ -88,110 +88,52 @@ void testApp::update() {
                 break;
                 
             case ConfigBackground:
-            { //Scope-compiler fix
-                unsigned char* oldPixels = meanGrayImage.getPixels();
-                unsigned char* newPixels = grayImage.getPixels();
-                for (int i = 0; i < grayImage.getWidth() * grayImage.getHeight(); i++) {
-                    oldPixels[i] = max(oldPixels[i], newPixels[i]);
-                }
-                meanGrayImage = oldPixels;
-            }
-                
-                timer++;
-                if(timer > depthImageAverageTime) {
-                    grayImageDiff = meanGrayImage;
-                    SendMessage("/config/done");
-                    state = ConfigColors;
-                    timer = 0;
-                }
-                ThresholdImages();
-                break;
-                
+              { //Scope-compiler fix
+                  unsigned char* oldPixels = meanGrayImage.getPixels();
+                  unsigned char* newPixels = grayImage.getPixels();
+                  for (int i = 0; i < grayImage.getWidth() * grayImage.getHeight(); i++) {
+                      oldPixels[i] = max(oldPixels[i], newPixels[i]);
+                  }
+                  meanGrayImage = oldPixels;
+              }
+              SaveBackground();
+              timer++;
+              if(timer > depthImageAverageTime) {
+                  grayImageDiff = meanGrayImage;
+                  SendMessage("/config/done");
+                  state = ConfigColors;
+                  timer = 0;
+              }
+              ThresholdImages();
+              break;
             case ConfigColors:
-                SendMessage("/config/done");
-                state = Main;
-                break;
+              SendMessage("/config/done");
+              state = Main;
+              break;
                 
             case Main:
-                if(configured) {
-//                    grayImage.absDiff(grayImageDiff);
-                    ThresholdImages();
-                    
-                    if (saveBk)
-                        SaveBackground();
-                    
-                    //                    grayResizeImg.setFromPixels(kinect.getDepthPixelsRef());
-                    //                    manipImage.scaleIntoMe(grayResizeImg);
-                    //                    grayImage.warpIntoMe(manipImage, dest, src);
-                    
-                    //                    colorResizeImg.setFromPixels(kinect.getPixelsRef());
-                    //                    colImg.scaleIntoMe(colorResizeImg);
-                    //                    warpedColImg.warpIntoMe(colImg, dest, src);
-                    //                    colManipImg.setFromPixels(warpedColImg.getPixelsRef());
-                    //                    if(saveBk){
-                    //                        saveBk = false;
-                    //                        grayImageDiff.setFromPixels(grayImage.getPixels(), camWidth, camHeight);
-                    //                        ofImage imageToSave;
-                    //                        imageToSave.setFromPixels(grayImageDiff.getPixelsRef());
-                    //                        imageToSave.saveImage("backgroundToDiff.png");
-                    //                    }
-                    
-                    //                    grayImage.absDiff(grayImageDiff);
-                    //                    for(int i=0; i<grayImage.getWidth()*grayImage.getHeight();i++){
-                    //                        int tempPixel = grayImage.getPixels()[i];
-                    //                        int xPos = i%camWidth;
-                    //                        int yPos = i/camWidth;
-                    //                        int index = colManipImg.getPixelsRef().getPixelIndex(xPos, yPos);
-                    //                        if(tempPixel == 0){
-                    //                            colManipImg.setColor(index, ofColor::black);
-                    //                            continue;
-                    //                        }
-                    //                        if(!(ofInRange(tempPixel, depthThresh, depthThresh+range))){
-                    //                            colManipImg.setColor(index, ofColor::black);
-                    //                            tempPixel = 0;
-                    //                        }else{
-                    //                            tempPixel = 255;
-                    //                        }
-                    //                        grayImage.getPixels()[i] = tempPixel;
-                    //                    }
-                    //                    warpedColImg.setFromPixels(colManipImg.getPixelsRef());
-                    
-                    contours.findContours(grayImage, minContArea, maxContArea, 8, true);
-                    
-                    if(contours.nBlobs > 0) {
-                        if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
-                            SendMessage("/checkColor");
-                            ofLogNotice("Blob found");
-                            timeSinceLastSend = ofGetElapsedTimef();
-                        }
-              
-                        if(whiteScreen) {
-                            ofxCvBlob blob = contours.blobs.at(0);
-                            checkForColor(warpedColImg, blob.centroid.x, blob.centroid.y);
-                            whiteScreen = false;
-                        }
-                    }
-                    
-                    //                    if(receiver.hasWaitingMessages()){
-                    //                        ofxOscMessage m;
-                    //                        receiver.getNextMessage(&m);
-                    //                        ofLogNotice("GOT A MESSAGE");
-                    //                        colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
-                    //                        ofxCvBlob blob = contours.blobs.at(0);
-                    //                        checkForColor(colImgNoCont, blob.centroid.x, blob.centroid.y);
-                    //                    }
-                    //                    if(configured && (timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef())){
-                    //                        for(int j = 0;j<contours.nBlobs;j++){
-                    //                            ofxCvBlob blob = contours.blobs.at(j);
-                    //                            ofxOscMessage m;
-                    //                            m.setAddress("/checkColor");
-                    //                            m.addFloatArg(1.0);
-                    //                            sender.sendMessage(m);
-                    //                            timeSinceLastSend = ofGetElapsedTimef();
-                    //                        }
-                    //                    }
+              if(configured) {
+                ThresholdImages();
+                if (saveBk)
+                  SaveBackground();
+
+                contours.findContours(grayImage, minContArea, maxContArea, 8, true);
+                if(contours.nBlobs > 0) {
+                  if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
+                    SendMessage("/checkColor");
+                    ofLogNotice("Blob found");
+                    timeSinceLastSend = ofGetElapsedTimef();
+                  }
+                  if(whiteScreen) {
+                    ofxCvBlob blob = contours.blobs.at(0);
+                    imgToCheck.setFromPixels(warpedColImg.getPixelsRef());
+                    //imgToCheck.setROI(blob.boundingRect);
+                    checkForColor(imgToCheck, blob.centroid.x, blob.centroid.y);
+                    whiteScreen = false;
+                  }
                 }
-                break;
+              }
+              break;
         }
         
     }
@@ -220,8 +162,8 @@ void testApp::ThresholdImages() {
     unsigned char* colorPixels = warpedColImg.getPixels();
     colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
     for (int i = 0, n = grayImage.getWidth() * grayImage.getHeight(); i < n; i++) {
-        if(ofInRange(grayPixels[i], depthThresh, depthThresh+range)){
-            grayPixels[i] = 255;
+        if(ofInRange(grayPixels[i],0,255)){// depthThresh, depthThresh+range)){
+            //grayPixels[i] = 255;
         }else{
             grayPixels[i] = 0;
             colorPixels[i*3] = colorPixels[i*3+1] = colorPixels[i*3+2] = 0;
@@ -424,7 +366,7 @@ void testApp::SaveBackground() {
     for(int i = 0; i < camWidth * camHeight; i++) {
         pixels[i] = 0;
     }
-    grayImageDiff = pixels;
+    grayImageDiff.setFromPixels(pixels, camWidth, camHeight);
     timer = 0;
     state = ConfigBackground;
 }
@@ -433,37 +375,6 @@ void testApp::SaveBackground() {
 void testApp::exit() {
     kinect.close();
 }
-void testApp::resetPoints(){
-    ofxXmlSettings settings;
-    settings.addTag("positions");
-    settings.pushTag("positions");
-    for(int i = 0;i<4;i++){
-        if(dest[i].x != -1 && dest[i].y != -1){
-            settings.addTag("position");
-            settings.pushTag("position", i);
-            settings.setValue("X", i*10);
-            settings.setValue("Y", i*10);
-            settings.popTag();
-        }
-    }
-}
-void testApp::savePoints(){
-    ofxXmlSettings settings;
-    settings.addTag("positions");
-    settings.pushTag("positions");
-    for(int i = 0;i<4;i++){
-        if(dest[i].x != -1 && dest[i].y != -1){
-            settings.addTag("position");
-            settings.pushTag("position", i);
-            settings.setValue("X", dest[i].x);
-            settings.setValue("Y", dest[i].y);
-            settings.popTag();
-        }
-    }
-    settings.popTag();
-    settings.saveFile("points.xml");
-}
-
 //--------------------------------------------------------------
 void testApp::keyPressed (int key) {
     switch(key){

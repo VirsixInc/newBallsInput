@@ -68,7 +68,7 @@ private:
     ofxCvGrayscaleImage grayImageDiff, grayImage, temp_depth, temp_scale;
     ofxCvGrayscaleImage meanGrayImage;
     
-    ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color;
+    ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color, imgToCheck;
     
     ofImage edge; // TEMP
     
