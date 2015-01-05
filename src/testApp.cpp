@@ -65,7 +65,11 @@ void testApp::setup() {
     gui.addToggle("Disable Timer", timerEngaged);
     gui.addToggle("Save Background", saveBk);
     gui.addToggle("Flip", flip);
+    gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 1000.0);
+    gui.addSlider("lifeTime", lifeTime, 0, 150);
     gui.loadFromXML();
+    
+    ballTracker.Init(minVariationDistance, lifeTime);
     
     partEffectFinder.setTargetColor(ofColor::white,ofxCv::TRACK_COLOR_HSV);
 }
@@ -75,6 +79,10 @@ void testApp::update() {
     partEffectFinder.setMinArea(minPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setMaxArea(maxPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setThreshold(partThresh); // TODO tweak. Seems good tho.
+    
+    ballTracker.SetMinDistance(minVariationDistance);
+    ballTracker.SetLifeTime(lifeTime);
+    ballTracker.Update();
     
     CheckOSCMessage();
     
@@ -180,8 +188,8 @@ void testApp::ThresholdImages() {
 void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
-    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(120); // TODO tweak. Seems good tho.
+    colorContourFinder.setMinArea(200); // TODO tweak. Seems good tho.
+    colorContourFinder.setThreshold(30); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
     colorContourFinder.findContours(warpedColImg);
     
@@ -320,6 +328,10 @@ void testApp::CheckOSCMessage() {
             if(addr == "/config/corner") {
                 state = ConfigScreen;
                 timer = 0;
+                dest[0] = ofPoint(0,0);
+                dest[1] = ofPoint(camWidth,0);
+                dest[2] = ofPoint(camWidth,camHeight);
+                dest[3] = ofPoint(0,camHeight);
             } else if(addr == "/startGame") {
                 state = Main;
             } else if(addr == "/readyCheck") {

@@ -9,6 +9,7 @@
 #include "ofxMSAInteractiveObject.h"
 #include "ofxSimpleGuiToo.h"
 #include "corners.h"
+#include "BallTracker.h"
 
 struct ballPlayer{
     int vote;
@@ -78,6 +79,13 @@ private:
     ofColor colorJustAcquired, colorJustAcquired2;
     
     ofxSimpleGuiToo gui;
+    
+    BallTracker ballTracker;
+    
+    // BallTracker variables
+    float minVariationDistance;
+    int lifeTime;
+    //----------------------
     
     bool passedColor, idSet, saveBk, resetPts, timerEngaged, configured, savePts, colorConfig;
     
