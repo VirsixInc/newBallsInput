@@ -4,7 +4,6 @@ const int depthImageAverageTime = 20;
 
 //--------------------------------------------------------------
 void testApp::setup() {
-    //    angle = 0;
     amtOfPlayers = 4;
     sender.setup("localhost", 9999);
     receiver.setup(7600);
@@ -24,7 +23,6 @@ void testApp::setup() {
     grayImage.allocate(camWidth, camHeight);
     grayForColor.allocate(camWidth, camHeight);
     grayImageDiff.allocate(camWidth, camHeight);
-    //meanGrayImage.allocate(camWidth, camHeight);
     temp_depth.allocate(kinect.width, kinect.height);
     temp_scale.allocate(camWidth, camHeight);
     imgToCheck.allocate(camWidth,camHeight);
@@ -96,28 +94,10 @@ void testApp::update() {
                 break;
                 
             case ConfigBackground:
-                /*
-              { //Scope-compiler fix
-                  unsigned char* oldPixels = meanGrayImage.getPixels();
-                  unsigned char* newPixels = grayImage.getPixels();
-                  for (int i = 0; i < grayImage.getWidth() * grayImage.getHeight(); i++) {
-                      oldPixels[i] = max(oldPixels[i], newPixels[i]);
-                  }
-                  meanGrayImage = oldPixels;
-              }
-              */
               SaveBackground();
               SendMessage("/config/done");
               state = ConfigColors;
-              /*
-              timer++;
-              if(timer > depthImageAverageTime) {
-                  grayImageDiff = meanGrayImage;
-                  SendMessage("/config/done");
-                  state = ConfigColors;
-                  timer = 0;
-              }
-              */
+
               ThresholdImages();
               break;
             case ConfigColors:
@@ -130,22 +110,22 @@ void testApp::update() {
                 ThresholdImages();
 
                 contours.findContours(grayImage, minContArea, maxContArea, 8, true);
+                partEffectFinder.findContours(colImgNoCont);
                 if(contours.nBlobs > 0) {
                   ofxCvBlob blob = contours.blobs.at(0);
-                  if(whiteScreen) {
-                    //imgToCheck.setROI(blob.boundingRect);
-                    whiteScreen = false;
-                  }else{
+                  if(!whiteScreen && timeSinceLastWhiteFound + 1.0 < ofGetElapsedTimef()) {
                     partEffectFinder.findContours(colImgNoCont);
-                    //colorContourFinder.resetMaxArea();
                     if(partEffectFinder.size() > 0){
                       ofxCvColorImage tmpColCont;
                       tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
                       tmpColCont.setROI(blob.boundingRect);
                       imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
                       checkForColor(imgToCheck, hitPoint);
+                      timeSinceLastWhiteFound = ofGetElapsedTimef();
                       whiteScreen = true;
                     }
+                  }else{
+                    whiteScreen = false;
                   }
                   if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
                     hitPoint = blob.centroid;
@@ -171,11 +151,9 @@ void testApp::UpdateImages() {
     temp_color.setFromPixels(warpedColImg.getPixelsRef());
     warpedColImg.warpIntoMe(temp_color, dest, src);
     
-    //    depthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     temp_depth.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     temp_scale.scaleIntoMe(temp_depth);
     grayImage.warpIntoMe(temp_scale, dest, src); //Temp stuff. Gotta clean it up
-    //    grayImage.blur(3);
 }
 
 //--------------------------------------------------------------
@@ -230,7 +208,6 @@ void testApp::ConfigureScreen() {
         settings.addTag("positions");
         settings.pushTag("positions");
         for(int i = 0; i < 4; i++){
-          //dest[i] = ofxCv::toOf(corners[i]);
           if(dest[i].x != -1 && dest[i].y != -1){
             settings.addTag("position");
             settings.pushTag("position", i);
@@ -244,20 +221,6 @@ void testApp::ConfigureScreen() {
        
         SendMessage("/config/cornerParsed");
         state = ConfigBackground;
-        
-        // Get depth
-        /*
-        depthThresh = 0;
-        
-        // Index *should* be right. Hopefully the dest corners arent parsed out by threshold image
-        for(int i = 0; i < 4; i++) {
-            int index = dest[i].x * grayImage.width + dest[i].y;
-            depthThresh += grayImage.getPixels()[index];
-        }
-        
-        depthThresh /= 4;
-        depthThresh += 15; // A little buffer to account for the screen waving
-        */
     }
 }
 
@@ -267,7 +230,7 @@ void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
     colorContourFinder.setMinArea(minContArea);
     colorContourFinder.setMaxArea(maxContArea);
     for(int i = 0;i<4;i++){
-        colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_H);
+        colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
         colorContourFinder.findContours(imageInQuestion);
         if(colorContourFinder.size() > 0){
             ofLogNotice("PLAYER FOUND: " + ofToString(i));
@@ -291,10 +254,11 @@ void testApp::draw() {
     ofSetHexColor(0xff0000);
     
     ofSetColor(255, 255, 255);
-    kinect.draw(0,0,camWidth,camHeight);
+    colImgNoCont.draw(0,0,camWidth,camHeight);
+    kinect.draw(camWidth*2,camHeight,camWidth,camHeight);
+    partEffectFinder.draw();
     imgToCheck.draw(0, camHeight, camWidth, camHeight);
     warpedColImg.draw(camWidth*2,0);
-    colImgNoCont.draw(camWidth*2,camHeight,camWidth,camHeight);
 
     grayImage.draw(camWidth, 0, camWidth, camHeight);
     grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
@@ -420,15 +384,6 @@ void testApp::keyPressed (int key) {
             id = key-49;
             idSet = true;
             break;
-            //        case '[':
-            //            angle++;
-            //            //if(angle>30) angle=30;
-            //            break;
-            //
-            //        case ']':
-            //            angle--;
-            //            //if(angle<-30) angle=-30;
-            //            break;
         case OF_KEY_LEFT:
             gui.toggleDraw();
     }
@@ -436,31 +391,12 @@ void testApp::keyPressed (int key) {
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button){
-    if (selectedCorner > -1){
-        dest[selectedCorner].x = x;
-        dest[selectedCorner].y = y;
-    }
 }
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
     
     selectedCorner = -1;
-    float smallestDist  = 999999;
-    float clickRadius = 10;
-    
-    for (int j = 0; j < 4; j++){
-        ofPoint inputPt;
-        inputPt.x = dest[j].x;
-        inputPt.y = dest[j].y;
-        inputPt.z = 0;
-        float len = sqrt( (inputPt.x - x) * (inputPt.x - x) +
-                         (inputPt.y - y) * (inputPt.y - y));
-        if (len < clickRadius && len < smallestDist){
-            selectedCorner  = j;
-            smallestDist = len;
-        }
-    } 
     if(selectedCorner == -1 && idSet){
         idSet = false;
         colorJustAcquired = warpedColImg.getPixelsRef().getColor(x, y);

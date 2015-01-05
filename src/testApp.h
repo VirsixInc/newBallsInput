@@ -92,7 +92,7 @@ private:
     int minContArea, maxContArea, minPartEffect, maxPartEffect, partThresh;
     int port;
     int amtOfPlayers;
-    float timeSinceLastSend, lastTime, prevRow;
+    float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
     
     bool whiteScreen;
     bool flip;

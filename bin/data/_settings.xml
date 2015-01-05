@@ -1,7 +1,7 @@
 <controls>
     <SliderInt_First_Col_Thresh>
         <name>First Col Thresh</name>
-        <value>25</value>
+        <value>15</value>
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
@@ -29,7 +29,7 @@
     </SliderInt_maxPartEffect>
     <SliderInt_partThresh>
         <name>partThresh</name>
-        <value>1</value>
+        <value>13</value>
     </SliderInt_partThresh>
     <Toggle_Configured>
         <name>Configured</name>
