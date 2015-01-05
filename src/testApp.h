@@ -38,7 +38,7 @@ private:
     void UpdateImages();
     void ConfigureScreen();
     void ThresholdImages();
-    void checkForColor(ofxCvColorImage imageInQuestion, float x, float y);
+    void checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire);
     void resetPoints();
     void savePoints();
     
@@ -57,7 +57,7 @@ private:
     State state;
     float threshold;
     
-    ofxCv::ContourFinder colorContourFinder;
+    ofxCv::ContourFinder colorContourFinder, partEffectFinder;
     ofxCv::TrackingColorMode trackingColorMode;
     
     ofxOscSender sender;
@@ -65,8 +65,9 @@ private:
     
     ofxKinect kinect;
     
-    ofxCvGrayscaleImage grayImageDiff, grayImage, temp_depth, temp_scale;
-    ofxCvGrayscaleImage meanGrayImage;
+    ofxCvGrayscaleImage grayImageDiff, grayImage, grayForColor, temp_depth, temp_scale;
+    ofPoint hitPoint;
+    //ofxCvGrayscaleImage firstThresh, secondThresh;//meanGrayImage;
     
     ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color, imgToCheck;
     
@@ -88,7 +89,7 @@ private:
     int id, configId, round;
     int camWidth, camHeight, kinWidth, kinHeight;
     int range, objThresh, depthThresh, secondColThresh;
-    int minContArea, maxContArea;
+    int minContArea, maxContArea, minPartEffect, maxPartEffect, partThresh;
     int port;
     int amtOfPlayers;
     float timeSinceLastSend, lastTime, prevRow;

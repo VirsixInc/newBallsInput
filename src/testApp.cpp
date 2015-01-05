@@ -22,8 +22,9 @@ void testApp::setup() {
     
     colImg.allocate(camWidth, camHeight);
     grayImage.allocate(camWidth, camHeight);
+    grayForColor.allocate(camWidth, camHeight);
     grayImageDiff.allocate(camWidth, camHeight);
-    meanGrayImage.allocate(camWidth, camHeight);
+    //meanGrayImage.allocate(camWidth, camHeight);
     temp_depth.allocate(kinect.width, kinect.height);
     temp_scale.allocate(camWidth, camHeight);
     imgToCheck.allocate(camWidth,camHeight);
@@ -48,9 +49,9 @@ void testApp::setup() {
     timer = 0;
     whiteScreen = false;
     
-    players[0].ballColor = ofColor(255,255,0);
-    players[1].ballColor = ofColor(255,0,255);
-    players[2].ballColor = ofColor(0,255,255);
+    players[0].ballColor = ofColor(255,0,0);
+    players[1].ballColor = ofColor(0,255,0);
+    players[2].ballColor = ofColor(0,255,0);
     players[3].ballColor = ofColor(0,255,0);
     
     gui.addSlider("First Col Thresh", targetColThresh, 0, 255);
@@ -58,6 +59,9 @@ void testApp::setup() {
     gui.addSlider("Range", range, 0, 20);
     gui.addSlider("minContArea", minContArea, 0, 100);
     gui.addSlider("maxContArea", maxContArea, 0, 2000);
+    gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
+    gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
+    gui.addSlider("partThresh", partThresh, 0, 255);
     gui.addToggle("Configured", configured);
     gui.addToggle("Color Configured", colorConfig);
     gui.addToggle("Disable Timer", timerEngaged);
@@ -65,18 +69,19 @@ void testApp::setup() {
     gui.addToggle("Flip", flip);
     gui.loadFromXML();
     
+    partEffectFinder.setTargetColor(ofColor::white,ofxCv::TRACK_COLOR_HSV);
 }
 
 //--------------------------------------------------------------
 void testApp::update() {
+    partEffectFinder.setMinArea(minPartEffect); // TODO tweak. Seems good tho.
+    partEffectFinder.setMaxArea(maxPartEffect); // TODO tweak. Seems good tho.
+    partEffectFinder.setThreshold(partThresh); // TODO tweak. Seems good tho.
     
     CheckOSCMessage();
     
     kinect.update();
     if(kinect.isFrameNew()) {
-        colorContourFinder.setThreshold(targetColThresh);
-        colorContourFinder.setMinArea(minContArea);
-        colorContourFinder.setMaxArea(maxContArea);
         
         UpdateImages();
         if (saveBk)
@@ -126,20 +131,26 @@ void testApp::update() {
 
                 contours.findContours(grayImage, minContArea, maxContArea, 8, true);
                 if(contours.nBlobs > 0) {
+                  ofxCvBlob blob = contours.blobs.at(0);
                   if(whiteScreen) {
-                    ofxCvBlob blob = contours.blobs.at(0);
                     //imgToCheck.setROI(blob.boundingRect);
-                    checkForColor(imgToCheck, blob.centroid.x, blob.centroid.y);
                     whiteScreen = false;
+                  }else{
+                    partEffectFinder.findContours(colImgNoCont);
+                    //colorContourFinder.resetMaxArea();
+                    if(partEffectFinder.size() > 0){
+                      ofxCvColorImage tmpColCont;
+                      tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                      tmpColCont.setROI(blob.boundingRect);
+                      imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                      checkForColor(imgToCheck, hitPoint);
+                      whiteScreen = true;
+                    }
                   }
                   if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
-                    ofxCvBlob blob = contours.blobs.at(0);
-                    ofxCvColorImage tmpColCont;
-                    tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                    tmpColCont.setROI(blob.boundingRect);
-                    imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                    hitPoint = blob.centroid;
                     //imgToCheck.drawROI(0,camHeight);
-                    SendHitMessage("/checkColor", ofPoint(contours.blobs.at(0).centroid), 0);
+                    SendHitMessage("/checkColor", hitPoint, 0);
                     ofLogNotice("Blob found");
                     timeSinceLastSend = ofGetElapsedTimef();
                   }
@@ -171,10 +182,12 @@ void testApp::UpdateImages() {
 void testApp::ThresholdImages() {
     grayImage.absDiff(grayImageDiff);
     unsigned char* grayPixels = grayImage.getPixels();
+    //grayForColor.setFromPixels(grayPixels.getPixels());
+
     unsigned char* colorPixels = warpedColImg.getPixels();
     colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
     for (int i = 0, n = grayImage.getWidth() * grayImage.getHeight(); i < n; i++) {
-        if(ofInRange(grayPixels[i],depthThresh,255)){ //depthThresh+range)){
+        if(ofInRange(grayPixels[i],depthThresh,depthThresh+range)){
             grayPixels[i] = 255;
         }else{
             grayPixels[i] = 0;
@@ -249,14 +262,18 @@ void testApp::ConfigureScreen() {
 }
 
 //--------------------------------------------------------------
-void testApp::checkForColor(ofxCvColorImage imageInQuestion, float x, float y){
+void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
+    colorContourFinder.setThreshold(targetColThresh);
+    colorContourFinder.setMinArea(minContArea);
+    colorContourFinder.setMaxArea(maxContArea);
     for(int i = 0;i<4;i++){
-        colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
+        colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_H);
         colorContourFinder.findContours(imageInQuestion);
         if(colorContourFinder.size() > 0){
             ofLogNotice("PLAYER FOUND: " + ofToString(i));
             players[i].ballFound = true;
-            SendHitMessage("/shoot", ofPoint(x,y), i);
+            SendHitMessage("/shoot", ptToFire, i);
+            break;
         }
     }
 }
