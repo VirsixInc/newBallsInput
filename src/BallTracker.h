@@ -13,9 +13,11 @@ public:
     BallData(ofPoint p_pos, int p_lifeTime) {
         pos = p_pos;
         lifeTime = p_lifeTime;
+        colorChecked = false;
     }
     ofPoint pos;
     int lifeTime;
+    bool colorChecked;
 };
 
 class BallTracker {
@@ -36,16 +38,26 @@ public:
         }
     }
     
-    bool UseBlob(ofxCvBlob blob) {
+    bool UseBlob(ofxCvBlob blob, bool checkColor) {
         BallData data(blob.centroid, lifeTime);
-        
+
         for(int i = 0; i < balls.size(); i++) {
-            if(balls[i].pos.distance(data.pos) < minVariationDistance) {
-                return false;
+            if(checkColor) {
+                if(balls[i].colorChecked == false) {
+                    if(balls[i].pos.distance(data.pos) > minVariationDistance) {
+                        balls[i].colorChecked = true;
+                        AddBall(data);
+                        return true;
+                    }
+                }
+            } else {
+                if(balls[i].pos.distance(data.pos) > minVariationDistance) {
+                    AddBall(data);
+                    return true;
+                }
             }
         }
-        AddBall(data);
-        return true;
+        return false;
     }
     
     void SetMinDistance(float p_minVariationDistance) {
@@ -55,11 +67,12 @@ public:
     void SetLifeTime(int p_lifeTime) {
         lifeTime = p_lifeTime;
     }
-    
-private:
+
     void AddBall(BallData data) {
         balls.push_back(data);
     }
+    
+private:
     
     vector<BallData> balls;
     

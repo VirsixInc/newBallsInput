@@ -293,7 +293,7 @@ obj/osx/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
   ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiTitle.h \
   ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiColorPicker.h \
   ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiComboBox.h \
-  src/corners.h src/intercept.h
+  src/corners.h src/intercept.h src/BallTracker.h
 
 src/testApp.h:
 
@@ -888,3 +888,5 @@ src/testApp.h:
 src/corners.h:
 
 src/intercept.h:
+
+src/BallTracker.h:

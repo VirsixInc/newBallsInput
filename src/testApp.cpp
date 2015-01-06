@@ -120,27 +120,34 @@ void testApp::update() {
                 contours.findContours(grayImage, minContArea, maxContArea, 8, true);
                 partEffectFinder.findContours(colImgNoCont);
                 if(contours.nBlobs > 0) {
-                  ofxCvBlob blob = contours.blobs.at(0);
-                  if(!whiteScreen && timeSinceLastWhiteFound + 1.0 < ofGetElapsedTimef()) {
+                  for(int i = 0; i<contours.nBlobs;i++){
+                    ofxCvBlob blob = contours.blobs.at(i);
                     partEffectFinder.findContours(colImgNoCont);
-                    if(partEffectFinder.size() > 0){
-                      ofxCvColorImage tmpColCont;
-                      tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                      tmpColCont.setROI(blob.boundingRect);
-                      imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                      checkForColor(imgToCheck, hitPoint);
-                      timeSinceLastWhiteFound = ofGetElapsedTimef();
-                      whiteScreen = true;
+                    if(ballTracker.UseBlob(blob)){
+                      if(partEffectFinder.size() > 0){
+                        ofLogNotice("FOUND A PARTEFFECT");
+                        ofxCvColorImage tmpColCont;
+                        tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                        tmpColCont.setROI(blob.boundingRect);
+                        imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                        checkForColor(imgToCheck, hitPoint);
+                        timeSinceLastWhiteFound = ofGetElapsedTimef();
+                      }
+                      hitPoint = blob.centroid;
+                      //imgToCheck.drawROI(0,camHeight);
+                      SendHitMessage("/checkColor", hitPoint, -2);
+                      ofLogNotice("Blob found");
+                      //if(!whiteScreen){// && timeSinceLastWhiteFound + 1.0 < ofGetElapsedTimef()) {
+                          /*
+                          whiteScreen = true;
+                        }
+                      }else{
+                        whiteScreen = false;
+                      }*/
+                      //if(timerEngaged){// && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
+                      timeSinceLastSend = ofGetElapsedTimef();
+                      //}
                     }
-                  }else{
-                    whiteScreen = false;
-                  }
-                  if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
-                    hitPoint = blob.centroid;
-                    //imgToCheck.drawROI(0,camHeight);
-                    SendHitMessage("/checkColor", hitPoint, 0);
-                    ofLogNotice("Blob found");
-                    timeSinceLastSend = ofGetElapsedTimef();
                   }
                 }
               }
@@ -188,8 +195,8 @@ void testApp::ThresholdImages() {
 void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
-    colorContourFinder.setMinArea(200); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(30); // TODO tweak. Seems good tho.
+    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
+    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
     colorContourFinder.findContours(warpedColImg);
     
@@ -352,7 +359,6 @@ void testApp::SendMessage(string message) {
 void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     if (player == -1)
         return;
-    
     ofxOscMessage m;
     m.setAddress(message);
     float x = pos.x / camWidth;
@@ -365,10 +371,12 @@ void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     m.addFloatArg(y);
     m.addIntArg(player);
     sender.sendMessage(m);
-    ofLogNotice(
-                "ID:" + ofToString(player) + "   X:"
-                + ofToString(x) + "   Y:"
-                + ofToString(y));
+    if(player>-1){
+      ofLogNotice(
+                  "ID:" + ofToString(player) + "   X:"
+                  + ofToString(x) + "   Y:"
+                  + ofToString(y));
+    }
     timeSinceLastSend = ofGetElapsedTimef();
 }
 
