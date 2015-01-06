@@ -195,8 +195,8 @@ void testApp::ThresholdImages() {
 void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
-    colorContourFinder.setMinArea(200); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(30); // TODO tweak. Seems good tho.
+    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
+    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
     colorContourFinder.findContours(warpedColImg);
     
@@ -242,7 +242,7 @@ void testApp::ConfigureScreen() {
 //--------------------------------------------------------------
 void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
   for(int i = 0;i<amtOfPlayers;i++){
-    colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
+    colorContourFinder.setTargetColor(players[i].ballColor, ofxCv::TRACK_COLOR_HSV);
     colorContourFinder.findContours(imageInQuestion);
     if(colorContourFinder.size() > 0){
         ofLogNotice("PLAYER FOUND: " + ofToString(i));

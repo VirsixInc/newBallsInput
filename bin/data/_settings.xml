@@ -1,19 +1,19 @@
 <controls>
     <SliderInt_First_Col_Thresh>
         <name>First Col Thresh</name>
-        <value>30</value>
+        <value>67</value>
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>9</value>
+        <value>12</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>7</value>
+        <value>11</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>250</value>
+        <value>155</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
@@ -51,4 +51,12 @@
         <name>Flip</name>
         <value>1</value>
     </Toggle_Flip>
+    <SliderFloat_minVariationDistance>
+        <name>minVariationDistance</name>
+        <value>0.010000000</value>
+    </SliderFloat_minVariationDistance>
+    <SliderInt_lifeTime>
+        <name>lifeTime</name>
+        <value>0</value>
+    </SliderInt_lifeTime>
 </controls>
