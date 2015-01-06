@@ -91,7 +91,7 @@ void testApp::update() {
         
         UpdateImages();
         if (saveBk)
-          SaveBackground();
+            SaveBackground();
         
         switch(state) {
             case Config:
@@ -102,56 +102,47 @@ void testApp::update() {
                 break;
                 
             case ConfigBackground:
-              SaveBackground();
-              SendMessage("/config/done");
-              state = ConfigColors;
-
-              ThresholdImages();
-              break;
+                SaveBackground();
+                SendMessage("/config/done");
+                state = ConfigColors;
+                
+                ThresholdImages();
+                break;
             case ConfigColors:
-              SendMessage("/config/done");
-              state = Main;
-              break;
+                SendMessage("/config/done");
+                state = Main;
+                break;
                 
             case Main:
-              if(configured) {
-                ThresholdImages();
-
-
-                partEffectFinder.findContours(colImgNoCont);
-                if(contours.nBlobs > 0) {
-                  for(int i = 0; i<contours.nBlobs;i++){
-                    ofxCvBlob blob = contours.blobs.at(i);
-                    partEffectFinder.findContours(colImgNoCont);
-                    if(ballTracker.UseBlob(blob, false)){
-                      if(partEffectFinder.size() > 0){
-                        ofLogNotice("FOUND A PARTEFFECT");
-                        ofxCvColorImage tmpColCont;
-                        tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                        tmpColCont.setROI(blob.boundingRect);
-                        imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                        checkForColor(imgToCheck, hitPoint);
-                        timeSinceLastWhiteFound = ofGetElapsedTimef();
-                      }
-                      hitPoint = blob.centroid;
-                      //imgToCheck.drawROI(0,camHeight);
-                      SendHitMessage("/checkColor", hitPoint, -2);
-                      ofLogNotice("Blob found");
-                      //if(!whiteScreen){// && timeSinceLastWhiteFound + 1.0 < ofGetElapsedTimef()) {
-                          /*
-                          whiteScreen = true;
+                if(configured) {
+                    ThresholdImages();
+                    
+                    contours.findContours(grayImage, minContArea, maxContArea, 8, true);
+                    
+                    if(contours.nBlobs > 0) {
+                        for(int i = 0; i < contours.nBlobs; i++){
+                            ofxCvBlob blob = contours.blobs.at(i);
+                            partEffectFinder.findContours(colImgNoCont);
+                            if(ballTracker.UseBlob(blob, true)){
+                                if(partEffectFinder.size() > 0){
+                                    ofLogNotice("FOUND A PARTEFFECT");
+                                    ofxCvColorImage tmpColCont;
+                                    tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                                    tmpColCont.setROI(blob.boundingRect);
+                                    imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                                    checkForColor(imgToCheck, hitPoint);
+                                }
+                            }
+                            if(ballTracker.UseBlob(blob, false)) {
+                                hitPoint = blob.centroid;
+                                
+                                SendHitMessage("/checkColor", hitPoint, -2);
+                                ofLogNotice("Blob found");
+                            }
                         }
-                      }else{
-                        whiteScreen = false;
-                      }*/
-                      //if(timerEngaged){// && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
-                      timeSinceLastSend = ofGetElapsedTimef();
-                      //}
                     }
-                  }
                 }
-              }
-              break;
+                break;
         }
         
     }
@@ -161,7 +152,7 @@ void testApp::update() {
 //--------------------------------------------------------------
 void testApp::UpdateImages() {
     colImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height);
-
+    
     warpedColImg.scaleIntoMe(colImg);
     temp_color.setFromPixels(warpedColImg.getPixelsRef());
     warpedColImg.warpIntoMe(temp_color, dest, src);
@@ -176,7 +167,7 @@ void testApp::ThresholdImages() {
     grayImage.absDiff(grayImageDiff);
     unsigned char* grayPixels = grayImage.getPixels();
     //grayForColor.setFromPixels(grayPixels.getPixels());
-
+    
     unsigned char* colorPixels = warpedColImg.getPixels();
     colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
     for (int i = 0, n = grayImage.getWidth() * grayImage.getHeight(); i < n; i++) {
@@ -213,7 +204,7 @@ void testApp::ConfigureScreen() {
     if(timer > 20) { //Delay to let front end change scenes
         const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
         get_corners(contPts, &contCorners);
-
+        
         dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
         dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
         dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
@@ -223,17 +214,17 @@ void testApp::ConfigureScreen() {
         settings.addTag("positions");
         settings.pushTag("positions");
         for(int i = 0; i < 4; i++){
-          if(dest[i].x != -1 && dest[i].y != -1){
-            settings.addTag("position");
-            settings.pushTag("position", i);
-            settings.setValue("X", dest[i].x);
-            settings.setValue("Y", dest[i].y);
-            settings.popTag();
-          }
+            if(dest[i].x != -1 && dest[i].y != -1){
+                settings.addTag("position");
+                settings.pushTag("position", i);
+                settings.setValue("X", dest[i].x);
+                settings.setValue("Y", dest[i].y);
+                settings.popTag();
+            }
         }
         settings.popTag();
         settings.saveFile("points.xml");
-       
+        
         SendMessage("/config/cornerParsed");
         state = ConfigBackground;
     }
@@ -274,10 +265,10 @@ void testApp::draw() {
     partEffectFinder.draw();
     imgToCheck.draw(0, camHeight, camWidth, camHeight);
     warpedColImg.draw(camWidth*2,0);
-
+    
     grayImage.draw(camWidth, 0, camWidth, camHeight);
     grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
-
+    
     if(configured){
         colorContourFinder.draw();
         contours.draw();
@@ -372,10 +363,10 @@ void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     m.addIntArg(player);
     sender.sendMessage(m);
     if(player>-1){
-      ofLogNotice(
-                  "ID:" + ofToString(player) + "   X:"
-                  + ofToString(x) + "   Y:"
-                  + ofToString(y));
+        ofLogNotice(
+                    "ID:" + ofToString(player) + "   X:"
+                    + ofToString(x) + "   Y:"
+                    + ofToString(y));
     }
     timeSinceLastSend = ofGetElapsedTimef();
 }
