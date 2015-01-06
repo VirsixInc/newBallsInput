@@ -40,24 +40,31 @@ public:
     
     bool UseBlob(ofxCvBlob blob, bool checkColor) {
         BallData data(blob.centroid, lifeTime);
-
-        for(int i = 0; i < balls.size(); i++) {
-            if(checkColor) {
-                if(balls[i].colorChecked == false) {
-                    if(balls[i].pos.distance(data.pos) > minVariationDistance) {
-                        balls[i].colorChecked = true;
-                        AddBall(data);
-                        return true;
-                    }
-                }
-            } else {
-                if(balls[i].pos.distance(data.pos) > minVariationDistance) {
-                    AddBall(data);
-                    return true;
+        
+        if(!checkColor) {
+            for(int i = 0; i < balls.size(); i++) {
+                if(balls[i].pos.distance(data.pos) < minVariationDistance) {
+                    return false;
                 }
             }
+            AddBall(data);
+        } else {
+            for(int i = 0; i < balls.size(); i++) {
+                if(balls[i].colorChecked) {
+                    if(balls[i].pos.distance(data.pos) < minVariationDistance) {
+                        return false;
+                    }
+                }
+            }
+            int closest = 0;
+            for(int i = 0; i < balls.size(); i++) {
+                if(balls[closest].pos.distance(data.pos) < balls[i].pos.distance(data.pos)) {
+                    closest = i;
+                }
+            }
+            balls[closest].colorChecked = true;
+            return false;
         }
-        return false;
     }
     
     void SetMinDistance(float p_minVariationDistance) {
@@ -68,12 +75,12 @@ public:
         lifeTime = p_lifeTime;
     }
 
+    
+private:   
     void AddBall(BallData data) {
         balls.push_back(data);
     }
-    
-private:
-    
+
     vector<BallData> balls;
     
     float minVariationDistance;

@@ -117,13 +117,13 @@ void testApp::update() {
               if(configured) {
                 ThresholdImages();
 
-                contours.findContours(grayImage, minContArea, maxContArea, 8, true);
+
                 partEffectFinder.findContours(colImgNoCont);
                 if(contours.nBlobs > 0) {
                   for(int i = 0; i<contours.nBlobs;i++){
                     ofxCvBlob blob = contours.blobs.at(i);
                     partEffectFinder.findContours(colImgNoCont);
-                    if(ballTracker.UseBlob(blob)){
+                    if(ballTracker.UseBlob(blob, false)){
                       if(partEffectFinder.size() > 0){
                         ofLogNotice("FOUND A PARTEFFECT");
                         ofxCvColorImage tmpColCont;
