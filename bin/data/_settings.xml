@@ -13,7 +13,7 @@
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>99</value>
+        <value>100</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
@@ -21,7 +21,7 @@
     </SliderInt_maxContArea>
     <SliderInt_minPartEffect>
         <name>minPartEffect</name>
-        <value>850</value>
+        <value>700</value>
     </SliderInt_minPartEffect>
     <SliderInt_maxPartEffect>
         <name>maxPartEffect</name>
@@ -29,7 +29,7 @@
     </SliderInt_maxPartEffect>
     <SliderInt_partThresh>
         <name>partThresh</name>
-        <value>5</value>
+        <value>8</value>
     </SliderInt_partThresh>
     <Toggle_Configured>
         <name>Configured</name>
@@ -53,10 +53,10 @@
     </Toggle_Flip>
     <SliderFloat_minVariationDistance>
         <name>minVariationDistance</name>
-        <value>120.008796692</value>
+        <value>203.007965088</value>
     </SliderFloat_minVariationDistance>
     <SliderInt_lifeTime>
         <name>lifeTime</name>
-        <value>63</value>
+        <value>31</value>
     </SliderInt_lifeTime>
 </controls>

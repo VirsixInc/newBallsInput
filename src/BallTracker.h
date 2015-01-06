@@ -48,14 +48,17 @@ public:
                 }
             }
             AddBall(data);
+            return true;
         } else {
+          if(balls.size()>0){
             for(int i = 0; i < balls.size(); i++) {
                 if(balls[i].colorChecked) {
                     if(balls[i].pos.distance(data.pos) < minVariationDistance) {
-                        return false;
+                      return false;
                     }
                 }
             }
+            ofLogNotice("Finding closest");
             int closest = 0;
             for(int i = 0; i < balls.size(); i++) {
                 if(balls[closest].pos.distance(data.pos) < balls[i].pos.distance(data.pos)) {
@@ -63,7 +66,8 @@ public:
                 }
             }
             balls[closest].colorChecked = true;
-            return false;
+            return true;
+          }
         }
     }
     

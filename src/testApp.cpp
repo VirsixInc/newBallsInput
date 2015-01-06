@@ -122,17 +122,18 @@ void testApp::update() {
                     if(contours.nBlobs > 0) {
                         for(int i = 0; i < contours.nBlobs; i++){
                             ofxCvBlob blob = contours.blobs.at(i);
-                            partEffectFinder.findContours(colImgNoCont);
-                            if(ballTracker.UseBlob(blob, true)){
-                                if(partEffectFinder.size() > 0){
-                                    ofLogNotice("FOUND A PARTEFFECT");
-                                    ofxCvColorImage tmpColCont;
-                                    tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                                    tmpColCont.setROI(blob.boundingRect);
-                                    imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                                    checkForColor(imgToCheck, hitPoint);
-                                }
-                            }
+                            //if(ballTracker.UseBlob(blob, true)){
+                              ofLogNotice("found non-color checked blob");
+                              partEffectFinder.findContours(colImgNoCont);
+                              if(partEffectFinder.size() > 0){
+                                  ofLogNotice("FOUND A PARTEFFECT");
+                                  ofxCvColorImage tmpColCont;
+                                  tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                                  tmpColCont.setROI(blob.boundingRect);
+                                  imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                                  checkForColor(imgToCheck, hitPoint);
+                              }
+                            //}
                             if(ballTracker.UseBlob(blob, false)) {
                                 hitPoint = blob.centroid;
                                 
