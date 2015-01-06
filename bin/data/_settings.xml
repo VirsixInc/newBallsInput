@@ -1,7 +1,7 @@
 <controls>
     <SliderInt_First_Col_Thresh>
         <name>First Col Thresh</name>
-        <value>15</value>
+        <value>30</value>
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
@@ -9,15 +9,15 @@
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>20</value>
+        <value>7</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>99</value>
+        <value>250</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
-        <value>1518</value>
+        <value>2000</value>
     </SliderInt_maxContArea>
     <SliderInt_minPartEffect>
         <name>minPartEffect</name>
@@ -29,7 +29,7 @@
     </SliderInt_maxPartEffect>
     <SliderInt_partThresh>
         <name>partThresh</name>
-        <value>13</value>
+        <value>9</value>
     </SliderInt_partThresh>
     <Toggle_Configured>
         <name>Configured</name>

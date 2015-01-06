@@ -5,6 +5,7 @@ const int depthImageAverageTime = 20;
 //--------------------------------------------------------------
 void testApp::setup() {
     amtOfPlayers = 4;
+    votesReq = 5;
     sender.setup("localhost", 9999);
     receiver.setup(7600);
     
@@ -55,7 +56,7 @@ void testApp::setup() {
     gui.addSlider("First Col Thresh", targetColThresh, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 20);
-    gui.addSlider("minContArea", minContArea, 0, 100);
+    gui.addSlider("minContArea", minContArea, 0, 1000);
     gui.addSlider("maxContArea", maxContArea, 0, 2000);
     gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
     gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
@@ -72,6 +73,9 @@ void testApp::setup() {
 
 //--------------------------------------------------------------
 void testApp::update() {
+  colorContourFinder.setThreshold(targetColThresh);
+  colorContourFinder.setMinArea(minContArea);
+  colorContourFinder.setMaxArea(maxContArea);
     partEffectFinder.setMinArea(minPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setMaxArea(maxPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setThreshold(partThresh); // TODO tweak. Seems good tho.
@@ -113,13 +117,16 @@ void testApp::update() {
                 partEffectFinder.findContours(colImgNoCont);
                 if(contours.nBlobs > 0) {
                   ofxCvBlob blob = contours.blobs.at(0);
-                  if(!whiteScreen && timeSinceLastWhiteFound + 1.0 < ofGetElapsedTimef()) {
+                  if(!whiteScreen && timeSinceLastWhiteFound + 0.5 < ofGetElapsedTimef()) {
                     partEffectFinder.findContours(colImgNoCont);
                     if(partEffectFinder.size() > 0){
                       ofxCvColorImage tmpColCont;
                       tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
                       tmpColCont.setROI(blob.boundingRect);
+                      tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
+                      //imgToCheck.scaleIntoMe(tmpColCont);
                       imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                      imgToCheck.convertToRange(1,200);
                       checkForColor(imgToCheck, hitPoint);
                       timeSinceLastWhiteFound = ofGetElapsedTimef();
                       whiteScreen = true;
@@ -127,7 +134,7 @@ void testApp::update() {
                   }else{
                     whiteScreen = false;
                   }
-                  if(timerEngaged && timeSinceLastSend + 1.0 < ofGetElapsedTimef()) {
+                  if(timerEngaged && timeSinceLastSend + 0.5 < ofGetElapsedTimef()) {
                     hitPoint = blob.centroid;
                     //imgToCheck.drawROI(0,camHeight);
                     SendHitMessage("/checkColor", hitPoint, 0);
@@ -226,19 +233,16 @@ void testApp::ConfigureScreen() {
 
 //--------------------------------------------------------------
 void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
-    colorContourFinder.setThreshold(targetColThresh);
-    colorContourFinder.setMinArea(minContArea);
-    colorContourFinder.setMaxArea(maxContArea);
-    for(int i = 0;i<4;i++){
-        colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
-        colorContourFinder.findContours(imageInQuestion);
-        if(colorContourFinder.size() > 0){
-            ofLogNotice("PLAYER FOUND: " + ofToString(i));
-            players[i].ballFound = true;
-            SendHitMessage("/shoot", ptToFire, i);
-            break;
-        }
+  for(int i = 0;i<amtOfPlayers;i++){
+    colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
+    colorContourFinder.findContours(imageInQuestion);
+    if(colorContourFinder.size() > 0){
+        ofLogNotice("PLAYER FOUND: " + ofToString(i));
+        players[i].ballFound = true;
+        SendHitMessage("/shoot", ptToFire, i);
+        break;
     }
+  }
 }
 //--------------------------------------------------------------
 void testApp::SaveBackground() {
@@ -257,7 +261,7 @@ void testApp::draw() {
     colImgNoCont.draw(0,0,camWidth,camHeight);
     kinect.draw(camWidth*2,camHeight,camWidth,camHeight);
     partEffectFinder.draw();
-    imgToCheck.draw(0, camHeight, camWidth, camHeight);
+    imgToCheck.draw(0, camHeight);
     warpedColImg.draw(camWidth*2,0);
 
     grayImage.draw(camWidth, 0, camWidth, camHeight);

@@ -82,7 +82,6 @@ private:
     bool passedColor, idSet, saveBk, resetPts, timerEngaged, configured, savePts, colorConfig;
     
     ballPlayer players[4];
-    int voteCount;
     long amtOfWhitePixels, hue, sat, bri;
     int colorToConfig[3];
     int targetColThresh,hueRange, satRange, briRange;
@@ -91,7 +90,7 @@ private:
     int range, objThresh, depthThresh, secondColThresh;
     int minContArea, maxContArea, minPartEffect, maxPartEffect, partThresh;
     int port;
-    int amtOfPlayers;
+    int amtOfPlayers, votesReq;
     float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
     
     bool whiteScreen;
