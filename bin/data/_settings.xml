@@ -9,19 +9,19 @@
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>7</value>
+        <value>12</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>250</value>
+        <value>155</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
-        <value>2000</value>
+        <value>880</value>
     </SliderInt_maxContArea>
     <SliderInt_minPartEffect>
         <name>minPartEffect</name>
-        <value>1850</value>
+        <value>1800</value>
     </SliderInt_minPartEffect>
     <SliderInt_maxPartEffect>
         <name>maxPartEffect</name>
@@ -29,7 +29,7 @@
     </SliderInt_maxPartEffect>
     <SliderInt_partThresh>
         <name>partThresh</name>
-        <value>9</value>
+        <value>4</value>
     </SliderInt_partThresh>
     <Toggle_Configured>
         <name>Configured</name>
