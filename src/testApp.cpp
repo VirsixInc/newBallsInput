@@ -61,16 +61,16 @@ void testApp::setup() {
     gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
     gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
     gui.addSlider("partThresh", partThresh, 0, 255);
+    gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 1000.0);
+    gui.addSlider("lifeTime", lifeTime, 0, 150);
     gui.addToggle("Configured", configured);
     gui.addToggle("Color Configured", colorConfig);
     gui.addToggle("Disable Timer", timerEngaged);
     gui.addToggle("Save Background", saveBk);
     gui.addToggle("Flip", flip);
-    gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 1000.0);
-    gui.addSlider("lifeTime", lifeTime, 0, 150);
     gui.loadFromXML();
     
-    ballTracker.Init(minVariationDistance, lifeTime);
+    ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
     
     partEffectFinder.setTargetColor(ofColor::white,ofxCv::TRACK_COLOR_HSV);
 }
@@ -84,9 +84,6 @@ void testApp::update() {
     partEffectFinder.setMaxArea(maxPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setThreshold(partThresh); // TODO tweak. Seems good tho.
     
-    ballTracker.SetMinDistance(minVariationDistance);
-    ballTracker.SetLifeTime(lifeTime);
-    ballTracker.Update();
     
     CheckOSCMessage();
     
@@ -121,12 +118,38 @@ void testApp::update() {
               if(configured) {
                 ThresholdImages();
 
-                contours.findContours(grayImage, minContArea, maxContArea, 8, true);
+                //contours.findContours(grayImage, minContArea, maxContArea, 8, true);
                 partEffectFinder.findContours(colImgNoCont);
+                labels.clear();
+                rects.clear();
+                ballTracker.track(grayImage, &rects, &labels);
+                if(oldLabels.size()<1){
+                  oldLabels = labels;
+                }
+                for(int i=0;i<labels.size();i++){ 
+                  if(labels[i] != oldLabels[i]){
+                    SendHitMessage("/checkColor", rects[i].centroid, 0);
+                  }
+                }
+                    /*
+                for(int i = 0; i<rects.size();i++){
+                  if(){
+                  }
+                }
+                */
+                for(int i = 0;i<rects.size();i++){
+
+                  //hitPoint = blob.centroid;
+                  //imgToCheck.drawROI(0,camHeight);
+                  //SendHitMessage("/checkColor", rects[i].centroid, 0);
+                  ofLogNotice("Blob found");
+                }
+                /*
                 if(contours.nBlobs > 0) {
                   ofxCvBlob blob = contours.blobs.at(0);
                   if(!whiteScreen && timeSinceLastWhiteFound + 0.5 < ofGetElapsedTimef()) {
                     partEffectFinder.findContours(colImgNoCont);
+
                     if(partEffectFinder.size() > 0){
                       ofxCvColorImage tmpColCont;
                       tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
@@ -143,13 +166,9 @@ void testApp::update() {
                     whiteScreen = false;
                   }
                   if(timerEngaged && timeSinceLastSend + 0.5 < ofGetElapsedTimef()) {
-                    hitPoint = blob.centroid;
-                    //imgToCheck.drawROI(0,camHeight);
-                    SendHitMessage("/checkColor", hitPoint, 0);
-                    ofLogNotice("Blob found");
-                    timeSinceLastSend = ofGetElapsedTimef();
                   }
                 }
+                */
               }
               break;
         }

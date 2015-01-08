@@ -17,6 +17,12 @@ struct ballPlayer{
     bool ballFound;
     int voteId;
 };
+struct newCont{
+  ofRectangle contour;
+  unsigned int label;
+  bool tracked;
+  int timer;
+};
 
 class testApp : public ofBaseApp {
     
@@ -81,6 +87,11 @@ private:
     ofxSimpleGuiToo gui;
     
     BallTracker ballTracker;
+    vector<newCont> ballObjects;
+    vector<ofRectangle> rects;
+    vector<unsigned int> labels;
+    vector<unsigned int> oldLabels;
+
     
     // BallTracker variables
     float minVariationDistance;
