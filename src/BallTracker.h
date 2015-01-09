@@ -14,7 +14,7 @@
 #ifndef _Ball_Tracker_H_
 #define _Ball_Tracker_H_
 
-#define LOGINFO 1
+#define LOGINFO 0
 
 #include "ofMain.h"
 #include "ofxOpenCv.h"
@@ -33,9 +33,11 @@ public:
         minContArea = p_minContArea;
         maxContArea = p_maxContArea;
         velSmoothRate = p_velSmoothRate;
+        
+        contourFinder.setUseTargetColor(false);
     }
     
-    void track(ofxCvGrayscaleImage gray, vector<ofRectangle>* rects, vector<int>* labels) {
+    void track(ofxCvGrayscaleImage gray, vector<ofRectangle>* rects, vector<unsigned int>* labels) {
         ofxCv::RectTracker& tracker = contourFinder.getTracker();
         
         if(persistence == NULL || maxDistance == NULL || minContArea == NULL || maxContArea == NULL) {
@@ -48,7 +50,6 @@ public:
         contourFinder.setFindHoles(true);
         contourFinder.setMinArea(*minContArea);
         contourFinder.setMaxArea(*maxContArea);
-//        contourFinder.setUseTargetColor(false);
         
         contourFinder.findContours(gray);
         

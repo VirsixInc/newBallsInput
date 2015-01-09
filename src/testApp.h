@@ -96,7 +96,12 @@ private:
     // BallTracker variables
     float minVariationDistance;
     int lifeTime;
+    float velSmoothRate;
+    int minContArea, maxContArea;
     //----------------------
+    
+    typedef std::pair<ofRectangle, unsigned int> rectSeenPair;
+    std::map<unsigned int, rectSeenPair> labelMap;
     
     bool passedColor, idSet, saveBk, resetPts, timerEngaged, configured, savePts, colorConfig;
     
@@ -107,7 +112,7 @@ private:
     int id, configId, round;
     int camWidth, camHeight, kinWidth, kinHeight;
     int range, objThresh, depthThresh, secondColThresh;
-    int minContArea, maxContArea, minPartEffect, maxPartEffect, partThresh;
+    int minPartEffect, maxPartEffect, partThresh;
     int port;
     int amtOfPlayers, votesReq;
     float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
