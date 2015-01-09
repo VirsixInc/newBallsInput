@@ -87,11 +87,11 @@ private:
     ofxSimpleGuiToo gui;
     
     BallTracker ballTracker;
-    vector<newCont> ballObjects;
+//    vector<newCont> ballObjects;
     vector<ofRectangle> rects;
     vector<unsigned int> labels;
-    vector<unsigned int> oldLabels;
-
+//    vector<unsigned int> oldLabels;
+    vector<ofVec2f> velocities;
     
     // BallTracker variables
     float minVariationDistance;
@@ -126,4 +126,6 @@ private:
     ofPoint dest[4];
     
     int selectedCorner;
+    
+    float yModAmount;
 };

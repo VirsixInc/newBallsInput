@@ -37,7 +37,7 @@ public:
         contourFinder.setUseTargetColor(false);
     }
     
-    void track(ofxCvGrayscaleImage gray, vector<ofRectangle>* rects, vector<unsigned int>* labels) {
+    void track(ofxCvGrayscaleImage gray, vector<ofRectangle>* rects, vector<unsigned int>* labels, vector<ofVec2f>* velocities) {
         ofxCv::RectTracker& tracker = contourFinder.getTracker();
         
         if(persistence == NULL || maxDistance == NULL || minContArea == NULL || maxContArea == NULL) {
@@ -64,6 +64,7 @@ public:
             cv::Rect_<int> rect = tracker.getCurrent(label);
             rects->push_back(ofxCv::toOf(rect));
             labels->push_back(label);
+            velocities->push_back(velocityMap[label]);
         }
     }
     

@@ -64,6 +64,7 @@ void testApp::setup() {
     gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 1000.0);
     gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
     gui.addSlider("lifeTime", lifeTime, 0, 150);
+    gui.addSlider("yModAmount", yModAmount, 0.0001, 0.01);
     gui.addToggle("Configured", configured);
     gui.addToggle("Color Configured", colorConfig);
 //    gui.addToggle("Disable Timer", timerEngaged);
@@ -121,7 +122,8 @@ void testApp::update() {
                     
                     labels.clear();
                     rects.clear();
-                    ballTracker.track(grayImage, &rects, &labels);
+                    velocities.clear();
+                    ballTracker.track(grayImage, &rects, &labels, &velocities);
                     
                     // labelMap is std::map<unsigned int, std::pair<ofRectangle, unsigned int>>
                     // Templatized and filled with std::map<label, rectSeenPair(boundingRect, timesSeen)>
@@ -131,18 +133,28 @@ void testApp::update() {
                             labelMap[labels[i]].first = rects[i]; // Update rect
                             
                             if(labelMap[labels[i]].second == 2) {
-                                SendHitMessage("/checkColor", labelMap[labels[i]].first.getCenter(), 0); // Send particle spawn msg
+                                ofPoint pos = rects[i].getCenter();
+                                int depth = temp_scale.getPixels()[temp_scale.getPixelsRef().getPixelIndex(pos.x, pos.y)];
+                                int modY = pos.y * (255 - depth) * yModAmount;
+//                                pos.y -= modY;
+                                
+                                pos += velocities[i];
+//                                ofLogNotice("y modded by: " + ofToString(modY));
+                                SendHitMessage("/checkColor", pos, 0); // Send particle spawn msg
                             } else if(labelMap[labels[i]].second > 5 && labelMap[labels[i]].second < 12) {
                                 // Search for particle. If found, check it contains rect. If it does, check color
                                 partEffectFinder.findContours(colImgNoCont);
                                 for(int j = 0; j < partEffectFinder.size(); j++) {
                                     ofRectangle partRect = ofxCv::toOf(partEffectFinder.getBoundingRect(i));
                                     if(partRect.inside(labelMap[labels[i]].first)) {
-                                        ofLogNotice("checking color!");
+//                                        ofLogNotice("checking color!");
                                         ofxCvColorImage tmpColCont;
+                                        tmpColCont.allocate(warpedColImg.width, warpedColImg.height);
                                         tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
                                         tmpColCont.setROI(labelMap[labels[i]].first);
-                                        tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
+//                                        tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
+                                        
+                                        imgToCheck.allocate(labelMap[labels[i]].first.width, labelMap[labels[i]].first.height);
                                         imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
                                         checkForColor(imgToCheck, labelMap[labels[i]].first.getCenter());
                                     }
@@ -162,6 +174,7 @@ void testApp::update() {
                             }
                         }
                     }
+                    
                     
 //                    //contours.findContours(grayImage, minContArea, maxContArea, 8, true);
 //                    partEffectFinder.findContours(colImgNoCont);
@@ -309,7 +322,7 @@ void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
         colorContourFinder.setTargetColor(players[i].ballColor, ofxCv::TRACK_COLOR_H);
         colorContourFinder.findContours(imageInQuestion);
         if(colorContourFinder.size() > 0){
-            ofLogNotice("PLAYER FOUND: " + ofToString(i));
+//            ofLogNotice("PLAYER FOUND: " + ofToString(i));
 //            players[i].ballFound = true;
             SendHitMessage("/shoot", ptToFire, i);
             break;
@@ -436,11 +449,11 @@ void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     m.addFloatArg(y);
     m.addIntArg(player);
     sender.sendMessage(m);
-    ofLogNotice(
-                "ID:" + ofToString(player) + "   X:"
-                + ofToString(x) + "   Y:"
-                + ofToString(y));
-    timeSinceLastSend = ofGetElapsedTimef();
+//    ofLogNotice(
+//                "ID:" + ofToString(player) + "   X:"
+//                + ofToString(x) + "   Y:"
+//                + ofToString(y));
+//    timeSinceLastSend = ofGetElapsedTimef();
 }
 
 
