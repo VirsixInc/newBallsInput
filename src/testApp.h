@@ -17,12 +17,6 @@ struct ballPlayer{
     bool ballFound;
     int voteId;
 };
-struct newCont{
-  ofRectangle contour;
-  unsigned int label;
-  bool tracked;
-  int timer;
-};
 
 class testApp : public ofBaseApp {
     
@@ -86,22 +80,20 @@ private:
     
     ofxSimpleGuiToo gui;
     
+    // BallTracker variables
     BallTracker ballTracker;
-//    vector<newCont> ballObjects;
     vector<ofRectangle> rects;
     vector<unsigned int> labels;
-//    vector<unsigned int> oldLabels;
     vector<ofVec2f> velocities;
     
-    // BallTracker variables
     float minVariationDistance;
     int lifeTime;
     float velSmoothRate;
     int minContArea, maxContArea;
     //----------------------
     
-    typedef std::pair<ofRectangle, unsigned int> rectSeenPair;
-    std::map<unsigned int, rectSeenPair> labelMap;
+//    typedef std::pair<ofRectangle, unsigned int> rectSeenPair;
+    std::map<unsigned int, ofRectangle> labelMap;
     
     bool passedColor, idSet, saveBk, resetPts, timerEngaged, configured, savePts, colorConfig;
     
@@ -117,6 +109,8 @@ private:
     int amtOfPlayers, votesReq;
     float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
     
+    
+    
     bool whiteScreen;
     bool flip;
     
@@ -126,6 +120,4 @@ private:
     ofPoint dest[4];
     
     int selectedCorner;
-    
-    float yModAmount;
 };

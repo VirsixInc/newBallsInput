@@ -54,6 +54,7 @@ public:
         contourFinder.findContours(gray);
         
         updateVelocity();
+        updateColorTracked();
         
 #if LOGINFO
         logInfo();
@@ -65,6 +66,29 @@ public:
             rects->push_back(ofxCv::toOf(rect));
             labels->push_back(label);
             velocities->push_back(velocityMap[label]);
+        }
+    }
+    
+    bool depthTracked(unsigned int label) {
+        vector<unsigned int> newLabels = contourFinder.getTracker().getNewLabels();
+        for(int i = 0; i < newLabels.size(); i++) {
+            if(label == newLabels[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    bool colorTracked(unsigned int label) {
+        if(colorCheckedMap.count(label) > 0) {
+            if(colorCheckedMap[label] == false) {
+                colorCheckedMap[label] = true;
+                return false;
+            }
+            return true;
+        } else {
+            ofLogNotice("Bad usage? (colorTracked func)");
+            return true;
         }
     }
     
@@ -95,15 +119,28 @@ private:
             } else {
                 velocityMap[label] = cur;
             }
-            std::map<unsigned int, ofVec2f>::iterator velocityItr = velocityMap.begin();
-            while(velocityItr != velocityMap.end()) {
-                unsigned int label = velocityItr->first;
-                if(!(velocityMap.count(label) > 0)) {
-                    velocityMap.erase(velocityItr++);
-                } else {
-                    ++velocityItr;
-                }
+        }
+        
+        vector<unsigned int> deadLabels = contourFinder.getTracker().getDeadLabels();
+        for(int i = 0 ; i < deadLabels.size(); i++) {
+            velocityMap.erase(deadLabels[i]);
+        }
+    }
+    
+    void updateColorTracked() {
+        for(int i = 0; i < contourFinder.size(); i++) {
+            unsigned int label = contourFinder.getLabel(i);
+            
+            if(colorCheckedMap.count(label) > 0) {
+               // Nothing (I think)
+            } else {
+                colorCheckedMap[label] = false;
             }
+        }
+        
+        vector<unsigned int> deadLabels = contourFinder.getTracker().getDeadLabels();
+        for(int i = 0 ; i < deadLabels.size(); i++) {
+            colorCheckedMap.erase(deadLabels[i]);
         }
     }
     
@@ -137,6 +174,7 @@ private:
     float* velSmoothRate;
     
     std::map<unsigned int, ofVec2f> velocityMap;
+    std::map<unsigned int, bool> colorCheckedMap;
     
     ofxCv::ContourFinder contourFinder;
 };

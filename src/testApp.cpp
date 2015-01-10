@@ -46,7 +46,7 @@ void testApp::setup() {
     
     state = ConfigBackground;
     timer = 0;
-//    whiteScreen = false;
+    whiteScreen = false;
     
     players[0].ballColor = ofColor(255,0,0);
     players[1].ballColor = ofColor(0,255,0);
@@ -64,28 +64,27 @@ void testApp::setup() {
     gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 1000.0);
     gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
     gui.addSlider("lifeTime", lifeTime, 0, 150);
-    gui.addSlider("yModAmount", yModAmount, 0.0001, 0.01);
     gui.addToggle("Configured", configured);
     gui.addToggle("Color Configured", colorConfig);
-//    gui.addToggle("Disable Timer", timerEngaged);
+    gui.addToggle("Disable Timer", timerEngaged);
     gui.addToggle("Save Background", saveBk);
     gui.addToggle("Flip", flip);
     gui.loadFromXML();
     
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
+
     
     partEffectFinder.setTargetColor(ofColor::white,ofxCv::TRACK_COLOR_HSV);
 }
 
 //--------------------------------------------------------------
 void testApp::update() {
-    colorContourFinder.setThreshold(targetColThresh);
-    colorContourFinder.setMinArea(minContArea);
-    colorContourFinder.setMaxArea(maxContArea);
+  colorContourFinder.setThreshold(targetColThresh);
+  colorContourFinder.setMinArea(minContArea);
+  colorContourFinder.setMaxArea(maxContArea);
     partEffectFinder.setMinArea(minPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setMaxArea(maxPartEffect); // TODO tweak. Seems good tho.
     partEffectFinder.setThreshold(partThresh); // TODO tweak. Seems good tho.
-    partEffectFinder.setTargetColor(ofColor::white); // Temp
     
     CheckOSCMessage();
     
@@ -94,7 +93,7 @@ void testApp::update() {
         
         UpdateImages();
         if (saveBk)
-            SaveBackground();
+          SaveBackground();
         
         switch(state) {
             case Config:
@@ -105,130 +104,57 @@ void testApp::update() {
                 break;
                 
             case ConfigBackground:
-                SaveBackground();
-                SendMessage("/config/done");
-                state = ConfigColors;
-                
-                ThresholdImages();
-                break;
+              SaveBackground();
+              SendMessage("/config/done");
+              state = ConfigColors;
+
+              ThresholdImages();
+              break;
             case ConfigColors:
-                SendMessage("/config/done");
-                state = Main;
-                break;
+              SendMessage("/config/done");
+              state = Main;
+              break;
                 
             case Main:
-                if(configured) {
-                    ThresholdImages();
-                    
-                    labels.clear();
-                    rects.clear();
-                    velocities.clear();
-                    ballTracker.track(grayImage, &rects, &labels, &velocities);
-                    
-                    // labelMap is std::map<unsigned int, std::pair<ofRectangle, unsigned int>>
-                    // Templatized and filled with std::map<label, rectSeenPair(boundingRect, timesSeen)>
-                    for(int i = 0; i < labels.size(); i++) {
-                        if(labelMap.count(labels[i]) > 0) {
-                            labelMap[labels[i]].second++;         // Increment times seen
-                            labelMap[labels[i]].first = rects[i]; // Update rect
-                            
-                            if(labelMap[labels[i]].second == 2) {
-                                ofPoint pos = rects[i].getCenter();
-                                int depth = temp_scale.getPixels()[temp_scale.getPixelsRef().getPixelIndex(pos.x, pos.y)];
-                                int modY = pos.y * (255 - depth) * yModAmount;
-//                                pos.y -= modY;
-                                
-                                pos += velocities[i];
-//                                ofLogNotice("y modded by: " + ofToString(modY));
-                                SendHitMessage("/checkColor", pos, 0); // Send particle spawn msg
-                            } else if(labelMap[labels[i]].second > 5 && labelMap[labels[i]].second < 12) {
-                                // Search for particle. If found, check it contains rect. If it does, check color
-                                partEffectFinder.findContours(colImgNoCont);
-                                for(int j = 0; j < partEffectFinder.size(); j++) {
-                                    ofRectangle partRect = ofxCv::toOf(partEffectFinder.getBoundingRect(i));
-                                    if(partRect.inside(labelMap[labels[i]].first)) {
-//                                        ofLogNotice("checking color!");
-                                        ofxCvColorImage tmpColCont;
-                                        tmpColCont.allocate(warpedColImg.width, warpedColImg.height);
-                                        tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                                        tmpColCont.setROI(labelMap[labels[i]].first);
-//                                        tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
-                                        
-                                        imgToCheck.allocate(labelMap[labels[i]].first.width, labelMap[labels[i]].first.height);
-                                        imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                                        checkForColor(imgToCheck, labelMap[labels[i]].first.getCenter());
-                                    }
-                                }
-                            }
-                        } else {
-                            labelMap[labels[i]] = rectSeenPair(rects[i], 1);
-                        }
-                        
-                        std::map<unsigned int, rectSeenPair>::iterator labelMapIter = labelMap.begin();
-                        while(labelMapIter != labelMap.end()) {
-                            unsigned int label = labelMapIter->first;
-                            if(!(labelMap.count(label) > 0)) {
-                                labelMap.erase(labelMapIter++);
-                            } else {
-                                ++labelMapIter;
-                            }
-                        }
+              if(configured) {
+                ThresholdImages();
+                  
+                labels.clear();
+                rects.clear();
+                velocities.clear();
+                ballTracker.track(grayImage, &rects, &labels, &velocities);
+
+//                contours.findContours(grayImage, minContArea, maxContArea, 8, true);
+//                partEffectFinder.findContours(colImgNoCont);
+                for(int i = 0; i < labels.size(); i++) {
+//                  ofxCvBlob blob = contours.blobs.at(i);
+                  if(!ballTracker.colorTracked(labels[i])) {
+                    partEffectFinder.findContours(colImgNoCont);
+                    if(partEffectFinder.size() > 0){
+                      ofxCvColorImage tmpColCont;
+                      tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                      tmpColCont.setROI(rects[i]);
+                      tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
+                      //imgToCheck.scaleIntoMe(tmpColCont);
+                      imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                      imgToCheck.convertToRange(1,200);
+                      checkForColor(imgToCheck, hitPoint);
+//                      timeSinceLastWhiteFound = ofGetElapsedTimef();
+//                      whiteScreen = true;
                     }
-                    
-                    
-//                    //contours.findContours(grayImage, minContArea, maxContArea, 8, true);
-//                    partEffectFinder.findContours(colImgNoCont);
-//                    labels.clear();
-//                    rects.clear();
-//                    ballTracker.track(grayImage, &rects, &labels);
-//                    if(oldLabels.size()<1){
-//                        oldLabels = labels;
-//                    }
-//                    for(int i=0;i<labels.size();i++){
-//                        if(labels[i] != oldLabels[i]){
-//                            SendHitMessage("/checkColor", rects[i].getCenter(), 0);
-//                        }
-//                    }
-//                    /*
-//                     for(int i = 0; i<rects.size();i++){
-//                     if(){
-//                     }
-//                     }
-//                     */
-//                    for(int i = 0;i<rects.size();i++){
-//                        
-//                        //hitPoint = blob.centroid;
-//                        //imgToCheck.drawROI(0,camHeight);
-//                        //SendHitMessage("/checkColor", rects[i].centroid, 0);
-//                        ofLogNotice("Blob found");
-//                    }
-                    /*
-                     if(contours.nBlobs > 0) {
-                     ofxCvBlob blob = contours.blobs.at(0);
-                     if(!whiteScreen && timeSinceLastWhiteFound + 0.5 < ofGetElapsedTimef()) {
-                     partEffectFinder.findContours(colImgNoCont);
-                     
-                     if(partEffectFinder.size() > 0){
-                     ofxCvColorImage tmpColCont;
-                     tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                     tmpColCont.setROI(blob.boundingRect);
-                     tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
-                     //imgToCheck.scaleIntoMe(tmpColCont);
-                     imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                     imgToCheck.convertToRange(1,200);
-                     checkForColor(imgToCheck, hitPoint);
-                     timeSinceLastWhiteFound = ofGetElapsedTimef();
-                     whiteScreen = true;
-                     }
-                     }else{
-                     whiteScreen = false;
-                     }
-                     if(timerEngaged && timeSinceLastSend + 0.5 < ofGetElapsedTimef()) {
-                     }
-                     }
-                     */
+                  }
+//                  else{
+//                    whiteScreen = false;
+//                  }
+                  if(!ballTracker.depthTracked(labels[i])) {
+                    hitPoint = rects[i].getCenter();
+                    SendHitMessage("/checkColor", hitPoint, 0);
+                    ofLogNotice("Blob found");
+//                    timeSinceLastSend = ofGetElapsedTimef();
+                  }
                 }
-                break;
+              }
+              break;
         }
         
     }
@@ -238,7 +164,7 @@ void testApp::update() {
 //--------------------------------------------------------------
 void testApp::UpdateImages() {
     colImg.setFromPixels(kinect.getPixels(), kinect.width, kinect.height);
-    
+
     warpedColImg.scaleIntoMe(colImg);
     temp_color.setFromPixels(warpedColImg.getPixelsRef());
     warpedColImg.warpIntoMe(temp_color, dest, src);
@@ -252,7 +178,8 @@ void testApp::UpdateImages() {
 void testApp::ThresholdImages() {
     grayImage.absDiff(grayImageDiff);
     unsigned char* grayPixels = grayImage.getPixels();
-    
+    //grayForColor.setFromPixels(grayPixels.getPixels());
+
     unsigned char* colorPixels = warpedColImg.getPixels();
     colImgNoCont.setFromPixels(warpedColImg.getPixelsRef());
     for (int i = 0, n = grayImage.getWidth() * grayImage.getHeight(); i < n; i++) {
@@ -264,7 +191,6 @@ void testApp::ThresholdImages() {
         }
     }
     grayImage = grayPixels;
-    grayImage.blur(1);
     warpedColImg = colorPixels;
 }
 
@@ -273,7 +199,7 @@ void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
     colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
+    colorContourFinder.setThreshold(120); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
     colorContourFinder.findContours(warpedColImg);
     
@@ -290,7 +216,7 @@ void testApp::ConfigureScreen() {
     if(timer > 20) { //Delay to let front end change scenes
         const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
         get_corners(contPts, &contCorners);
-        
+
         dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
         dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
         dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
@@ -300,17 +226,17 @@ void testApp::ConfigureScreen() {
         settings.addTag("positions");
         settings.pushTag("positions");
         for(int i = 0; i < 4; i++){
-            if(dest[i].x != -1 && dest[i].y != -1){
-                settings.addTag("position");
-                settings.pushTag("position", i);
-                settings.setValue("X", dest[i].x);
-                settings.setValue("Y", dest[i].y);
-                settings.popTag();
-            }
+          if(dest[i].x != -1 && dest[i].y != -1){
+            settings.addTag("position");
+            settings.pushTag("position", i);
+            settings.setValue("X", dest[i].x);
+            settings.setValue("Y", dest[i].y);
+            settings.popTag();
+          }
         }
         settings.popTag();
         settings.saveFile("points.xml");
-        
+       
         SendMessage("/config/cornerParsed");
         state = ConfigBackground;
     }
@@ -318,16 +244,16 @@ void testApp::ConfigureScreen() {
 
 //--------------------------------------------------------------
 void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
-    for(int i = 0;i<amtOfPlayers;i++){
-        colorContourFinder.setTargetColor(players[i].ballColor, ofxCv::TRACK_COLOR_H);
-        colorContourFinder.findContours(imageInQuestion);
-        if(colorContourFinder.size() > 0){
-//            ofLogNotice("PLAYER FOUND: " + ofToString(i));
-//            players[i].ballFound = true;
-            SendHitMessage("/shoot", ptToFire, i);
-            break;
-        }
+  for(int i = 0;i<amtOfPlayers;i++){
+    colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
+    colorContourFinder.findContours(imageInQuestion);
+    if(colorContourFinder.size() > 0){
+        ofLogNotice("PLAYER FOUND: " + ofToString(i));
+        players[i].ballFound = true;
+        SendHitMessage("/shoot", ptToFire, i);
+        break;
     }
+  }
 }
 //--------------------------------------------------------------
 void testApp::SaveBackground() {
@@ -348,12 +274,10 @@ void testApp::draw() {
     partEffectFinder.draw();
     imgToCheck.draw(0, camHeight);
     warpedColImg.draw(camWidth*2,0);
-    
+
     grayImage.draw(camWidth, 0, camWidth, camHeight);
     grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
-    
-    ballTracker.draw();
-    
+
     if(configured){
         colorContourFinder.draw();
         contours.draw();
@@ -411,16 +335,11 @@ void testApp::CheckOSCMessage() {
             if(addr == "/config/corner") {
                 state = ConfigScreen;
                 timer = 0;
-                dest[0] = ofPoint(0,0);
-                dest[1] = ofPoint(camWidth,0);
-                dest[2] = ofPoint(camWidth,camHeight);
-                dest[3] = ofPoint(0,camHeight);
             } else if(addr == "/startGame") {
                 state = Main;
+            } else if(addr == "/readyCheck") {
+                whiteScreen = true;
             }
-//            } else if(addr == "/readyCheck") {
-//                whiteScreen = true;
-//            }
         }
     }
 }
@@ -449,11 +368,11 @@ void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     m.addFloatArg(y);
     m.addIntArg(player);
     sender.sendMessage(m);
-//    ofLogNotice(
-//                "ID:" + ofToString(player) + "   X:"
-//                + ofToString(x) + "   Y:"
-//                + ofToString(y));
-//    timeSinceLastSend = ofGetElapsedTimef();
+    ofLogNotice(
+                "ID:" + ofToString(player) + "   X:"
+                + ofToString(x) + "   Y:"
+                + ofToString(y));
+    timeSinceLastSend = ofGetElapsedTimef();
 }
 
 
