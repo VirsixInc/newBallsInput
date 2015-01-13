@@ -1,36 +1,48 @@
 <controls>
     <SliderInt_First_Col_Thresh>
         <name>First Col Thresh</name>
-        <value>67</value>
+        <value>88</value>
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
-        <value>12</value>
+        <value>10</value>
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>80</value>
+        <value>13</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>365</value>
+        <value>440</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
-        <value>1375</value>
+        <value>1518</value>
     </SliderInt_maxContArea>
     <SliderInt_minPartEffect>
         <name>minPartEffect</name>
-        <value>1850</value>
+        <value>1200</value>
     </SliderInt_minPartEffect>
     <SliderInt_maxPartEffect>
         <name>maxPartEffect</name>
-        <value>20000</value>
+        <value>18600</value>
     </SliderInt_maxPartEffect>
     <SliderInt_partThresh>
         <name>partThresh</name>
-        <value>9</value>
+        <value>113</value>
     </SliderInt_partThresh>
+    <SliderFloat_minVariationDistance>
+        <name>minVariationDistance</name>
+        <value>75.009254456</value>
+    </SliderFloat_minVariationDistance>
+    <SliderFloat_velSmoothRate>
+        <name>velSmoothRate</name>
+        <value>0.774999976</value>
+    </SliderFloat_velSmoothRate>
+    <SliderInt_lifeTime>
+        <name>lifeTime</name>
+        <value>19</value>
+    </SliderInt_lifeTime>
     <Toggle_Configured>
         <name>Configured</name>
         <value>1</value>
@@ -41,7 +53,7 @@
     </Toggle_Color_Configured>
     <Toggle_Disable_Timer>
         <name>Disable Timer</name>
-        <value>1</value>
+        <value>0</value>
     </Toggle_Disable_Timer>
     <Toggle_Save_Background>
         <name>Save Background</name>
@@ -51,12 +63,4 @@
         <name>Flip</name>
         <value>1</value>
     </Toggle_Flip>
-    <SliderFloat_minVariationDistance>
-        <name>minVariationDistance</name>
-        <value>0.010000000</value>
-    </SliderFloat_minVariationDistance>
-    <SliderInt_lifeTime>
-        <name>lifeTime</name>
-        <value>0</value>
-    </SliderInt_lifeTime>
 </controls>

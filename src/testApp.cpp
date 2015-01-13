@@ -73,7 +73,7 @@ void testApp::setup() {
     
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
 
-    partEffectFinder.setTargetColor(ofColor::white,ofxCv::TRACK_COLOR_HSV);
+    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
 }
 
 //--------------------------------------------------------------
@@ -133,14 +133,14 @@ void testApp::update() {
                       tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
 
                       imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                      imgToCheck.convertToRange(1,200);
+//                      imgToCheck.convertToRange(1,200);
                       checkForColor(imgToCheck, hitPoint);
                     }
                   }
                   if(!ballTracker.depthTracked(labels[i])) {
                     hitPoint = rects[i].getCenter();
                     SendHitMessage("/checkColor", hitPoint, 0);
-                    ofLogNotice("Blob found");
+//                    ofLogNotice("Blob found");
                   }
                 }
               }
@@ -272,21 +272,26 @@ void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire) {
             color = i;
         
     }
+    if(color == 1)
+        color = 3;
+    ofLogNotice(ofToString(color) + "=color");
+    SendHitMessage("/shoot", ptToFire, color);
     
     //TODO Should do something for min acceptable color difference
     //----------------------------------------------------------------------
     
-    //-----------------------Contour finder method--------------------------
-  for(int i = 0;i<amtOfPlayers;i++){
-    colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
-    colorContourFinder.findContours(imageInQuestion);
-    if(colorContourFinder.size() > 0){
-        ofLogNotice("PLAYER FOUND: " + ofToString(i));
-        players[i].ballFound = true;
-        SendHitMessage("/shoot", ptToFire, i);
-        break;
-    }
-  }
+//    //-----------------------Contour finder method--------------------------
+//  for(int i = 0;i<amtOfPlayers;i++){
+//    colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
+//    colorContourFinder.findContours(imageInQuestion);
+//    if(colorContourFinder.size() > 0){
+//        ofLogNotice("PLAYER FOUND: " + ofToString(i));
+//        players[i].ballFound = true;
+//        SendHitMessage("/shoot", ptToFire, i);
+//        break;
+//    }
+//  }
+//    //----------------------------------------------------------------------
 }
 //--------------------------------------------------------------
 void testApp::SaveBackground() {
@@ -405,11 +410,11 @@ void testApp::SendHitMessage(string message, ofPoint pos, int player) {
     m.addFloatArg(y);
     m.addIntArg(player);
     sender.sendMessage(m);
-    ofLogNotice(
-                "ID:" + ofToString(player) + "   X:"
-                + ofToString(x) + "   Y:"
-                + ofToString(y));
-    timeSinceLastSend = ofGetElapsedTimef();
+//    ofLogNotice(
+//                "ID:" + ofToString(player) + "   X:"
+//                + ofToString(x) + "   Y:"
+//                + ofToString(y));
+//    timeSinceLastSend = ofGetElapsedTimef();
 }
 
 
