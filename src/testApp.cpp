@@ -44,7 +44,7 @@ void testApp::setup() {
     dest[2] = ofPoint(camWidth,camHeight);
     dest[3] = ofPoint(0,camHeight);
     
-    state = ConfigBackground;
+    state = Config;
     timer = 0;
     whiteScreen = false;
     
@@ -73,7 +73,6 @@ void testApp::setup() {
     
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
 
-    
     partEffectFinder.setTargetColor(ofColor::white,ofxCv::TRACK_COLOR_HSV);
 }
 
@@ -82,9 +81,9 @@ void testApp::update() {
   colorContourFinder.setThreshold(targetColThresh);
   colorContourFinder.setMinArea(minContArea);
   colorContourFinder.setMaxArea(maxContArea);
-    partEffectFinder.setMinArea(minPartEffect); // TODO tweak. Seems good tho.
-    partEffectFinder.setMaxArea(maxPartEffect); // TODO tweak. Seems good tho.
-    partEffectFinder.setThreshold(partThresh); // TODO tweak. Seems good tho.
+    partEffectFinder.setMinArea(minPartEffect);
+    partEffectFinder.setMaxArea(maxPartEffect);
+    partEffectFinder.setThreshold(partThresh);
     
     CheckOSCMessage();
     
@@ -97,6 +96,9 @@ void testApp::update() {
         
         switch(state) {
             case Config:
+                SendMessage("/config/start");
+                state = ConfigScreen;
+                timer = 0;
                 break;
                 
             case ConfigScreen:
@@ -106,13 +108,9 @@ void testApp::update() {
             case ConfigBackground:
               SaveBackground();
               SendMessage("/config/done");
-              state = ConfigColors;
+              state = Main;
 
               ThresholdImages();
-              break;
-            case ConfigColors:
-              SendMessage("/config/done");
-              state = Main;
               break;
                 
             case Main:
@@ -124,33 +122,25 @@ void testApp::update() {
                 velocities.clear();
                 ballTracker.track(grayImage, &rects, &labels, &velocities);
 
-//                contours.findContours(grayImage, minContArea, maxContArea, 8, true);
-//                partEffectFinder.findContours(colImgNoCont);
                 for(int i = 0; i < labels.size(); i++) {
-//                  ofxCvBlob blob = contours.blobs.at(i);
                   if(!ballTracker.colorTracked(labels[i])) {
                     partEffectFinder.findContours(colImgNoCont);
                     if(partEffectFinder.size() > 0){
+                      hitPoint = rects[i].getCenter();
                       ofxCvColorImage tmpColCont;
                       tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
                       tmpColCont.setROI(rects[i]);
                       tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
-                      //imgToCheck.scaleIntoMe(tmpColCont);
+
                       imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
                       imgToCheck.convertToRange(1,200);
                       checkForColor(imgToCheck, hitPoint);
-//                      timeSinceLastWhiteFound = ofGetElapsedTimef();
-//                      whiteScreen = true;
                     }
                   }
-//                  else{
-//                    whiteScreen = false;
-//                  }
                   if(!ballTracker.depthTracked(labels[i])) {
                     hitPoint = rects[i].getCenter();
                     SendHitMessage("/checkColor", hitPoint, 0);
                     ofLogNotice("Blob found");
-//                    timeSinceLastSend = ofGetElapsedTimef();
                   }
                 }
               }
@@ -199,7 +189,7 @@ void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
     colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(120); // TODO tweak. Seems good tho.
+    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
     colorContourFinder.findContours(warpedColImg);
     
@@ -213,7 +203,7 @@ void testApp::ConfigureScreen() {
         return;
     }
     
-    if(timer > 20) { //Delay to let front end change scenes
+    if(timer > 10) { //Delay to let front end change scenes
         const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
         get_corners(contPts, &contCorners);
 
@@ -237,13 +227,56 @@ void testApp::ConfigureScreen() {
         settings.popTag();
         settings.saveFile("points.xml");
        
-        SendMessage("/config/cornerParsed");
+//        SendMessage("/config/done");
         state = ConfigBackground;
     }
 }
 
 //--------------------------------------------------------------
-void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire){
+void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire) {
+    //-----------------------Average color method---------------------------
+    int r, g, b; //Could *theoretically* be an issue with int maxing out depending on blob size
+    r = g = b = 0;
+
+    int samples = 0;
+    for(int i = 0, n = imageInQuestion.width; i < n; i++) {
+        for(int j = 0, n2 = imageInQuestion.height; j < n2; j++) {
+            ofColor color = imageInQuestion.getPixelsRef().getColor(i, j);
+            if(color != ofColor::black) {
+                r += color.r;
+                g += color.g;
+                b += color.b;
+                samples++;
+            }
+        }
+    }
+    
+    if(samples == 0) //Stop division by zero. *Shouldn't* happen
+        samples = 1;
+    
+    ofColor averageColor = ofColor(r/samples, g/samples, b/samples);
+    
+    int color = 0;
+    for(int i = 1; i < 2; i++) {
+        int curColorDist = sqrt(
+                                pow(players[color].ballColor.r - averageColor.r, 2.0f)
+                                + pow(players[color].ballColor.g - averageColor.g, 2.0f)
+                                + pow(players[color].ballColor.b - averageColor.b, 2.0f)
+                                );
+        int otherColorDist = sqrt(
+                                  pow(players[i].ballColor.r - averageColor.r, 2.0f)
+                                  + pow(players[i].ballColor.g - averageColor.g, 2.0f)
+                                  + pow(players[i].ballColor.b - averageColor.b, 2.0f)
+                                  );
+        if(otherColorDist < curColorDist)
+            color = i;
+        
+    }
+    
+    //TODO Should do something for min acceptable color difference
+    //----------------------------------------------------------------------
+    
+    //-----------------------Contour finder method--------------------------
   for(int i = 0;i<amtOfPlayers;i++){
     colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
     colorContourFinder.findContours(imageInQuestion);
@@ -332,9 +365,13 @@ void testApp::CheckOSCMessage() {
         ofxOscMessage m;
         if(receiver.getNextMessage(&m)) {
             string addr = m.getAddress();
-            if(addr == "/config/corner") {
+            if(addr == "/config/start") {
                 state = ConfigScreen;
                 timer = 0;
+                dest[0] = ofPoint(0,0);
+                dest[1] = ofPoint(camWidth,0);
+                dest[2] = ofPoint(camWidth,camHeight);
+                dest[3] = ofPoint(0,camHeight);
             } else if(addr == "/startGame") {
                 state = Main;
             } else if(addr == "/readyCheck") {

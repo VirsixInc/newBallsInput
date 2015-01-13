@@ -22,7 +22,7 @@ class testApp : public ofBaseApp {
     
 public:
     enum State {
-        ConfigBackground, ConfigColors, Main, ConfigScreen, Config
+        ConfigBackground, Main, ConfigScreen, Config
     };
     void setup();
     void update();
