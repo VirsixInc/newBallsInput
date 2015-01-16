@@ -12,10 +12,10 @@
 #include "BallTracker.h"
 
 struct ballPlayer{
-    int vote;
+//    int vote;
     ofColor ballColor;
     bool ballFound;
-    int voteId;
+//    int voteId;
 };
 
 class testApp : public ofBaseApp {
@@ -50,8 +50,8 @@ private:
     void SendMessage(string message);
     void SendHitMessage(string message, ofPoint pos, int player);
     
-    cv::Point2f ComputeIntersect(cv::Vec4i a, cv::Vec4i b);
-    void SortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center);
+//    cv::Point2f ComputeIntersect(cv::Vec4i a, cv::Vec4i b);
+//    void SortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center);
 
     Corners contCorners;
     
@@ -72,7 +72,7 @@ private:
     
     ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color, imgToCheck;
     
-    ofImage edge; // TEMP
+//    ofImage edge; // TEMP
     
     ofxCvContourFinder contours, colorContours;
     

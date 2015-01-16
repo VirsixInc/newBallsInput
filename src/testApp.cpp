@@ -5,7 +5,7 @@ const int depthImageAverageTime = 20;
 //--------------------------------------------------------------
 void testApp::setup() {
     amtOfPlayers = 4;
-    votesReq = 5;
+//    votesReq = 5;
     sender.setup("localhost", 9999);
     receiver.setup(7600);
     
@@ -13,7 +13,7 @@ void testApp::setup() {
     kinect.init();
     kinect.open();                // Opens first available kinect
     
-    lastTime = 0;
+//    lastTime = 0;
     
     camWidth = 320;
     camHeight = 240;
@@ -28,7 +28,7 @@ void testApp::setup() {
     temp_scale.allocate(camWidth, camHeight);
     imgToCheck.allocate(camWidth,camHeight);
     
-    edge.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
+//    edge.allocate(camWidth, camHeight, OF_IMAGE_GRAYSCALE);
     warpedColImg.allocate(camWidth, camHeight);
     colImgNoCont.allocate(camWidth, camHeight);
     
@@ -46,7 +46,7 @@ void testApp::setup() {
     
     state = Config;
     timer = 0;
-    whiteScreen = false;
+//    whiteScreen = false;
     
     players[0].ballColor = ofColor(255,0,0);
     players[1].ballColor = ofColor(0,255,0);
