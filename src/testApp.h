@@ -10,6 +10,7 @@
 #include "ofxSimpleGuiToo.h"
 #include "corners.h"
 #include "BallTracker.h"
+#include "AutoConfigurator.h"
 
 struct ballPlayer{
 //    int vote;
@@ -21,9 +22,9 @@ struct ballPlayer{
 class testApp : public ofBaseApp {
     
 public:
-    enum State {
-        ConfigBackground, Main, ConfigScreen, Config
-    };
+//    enum State {
+//        ConfigBackground, Main, ConfigScreen, Config
+//    };
     void setup();
     void update();
     void draw();
@@ -55,7 +56,7 @@ private:
 
     Corners contCorners;
     
-    State state;
+//    State state;
     float threshold;
     
     ofxCv::ContourFinder colorContourFinder, partEffectFinder;
@@ -68,11 +69,8 @@ private:
     
     ofxCvGrayscaleImage grayImageDiff, grayImage, grayForColor, temp_depth, temp_scale;
     ofPoint hitPoint;
-    //ofxCvGrayscaleImage firstThresh, secondThresh;//meanGrayImage;
     
     ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color, imgToCheck;
-    
-//    ofImage edge; // TEMP
     
     ofxCvContourFinder contours, colorContours;
     
@@ -92,8 +90,12 @@ private:
     int minContArea, maxContArea;
     //----------------------
     
+    //AutoConfigurator stuff
+    AutoConfigurator autoConfigurator;
+    
+    
 //    typedef std::pair<ofRectangle, unsigned int> rectSeenPair;
-    std::map<unsigned int, ofRectangle> labelMap;
+//    std::map<unsigned int, ofRectangle> labelMap;
     
     bool passedColor, idSet, saveBk, resetPts, timerEngaged, configured, savePts, colorConfig;
     
@@ -108,8 +110,6 @@ private:
     int port;
     int amtOfPlayers, votesReq;
     float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
-    
-    
     
     bool whiteScreen;
     bool flip;

@@ -44,8 +44,8 @@ void testApp::setup() {
     dest[2] = ofPoint(camWidth,camHeight);
     dest[3] = ofPoint(0,camHeight);
     
-    state = Config;
-    timer = 0;
+//    state = Config;
+//    timer = 0;
 //    whiteScreen = false;
     
     players[0].ballColor = ofColor(255,0,0);
@@ -74,81 +74,99 @@ void testApp::setup() {
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
 
     partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
+    
+    autoConfigurator.init(camWidth, camHeight);
+    
+    SendMessage("/config/start");
 }
 
 //--------------------------------------------------------------
 void testApp::update() {
-  colorContourFinder.setThreshold(targetColThresh);
-  colorContourFinder.setMinArea(minContArea);
-  colorContourFinder.setMaxArea(maxContArea);
-    partEffectFinder.setMinArea(minPartEffect);
-    partEffectFinder.setMaxArea(maxPartEffect);
-    partEffectFinder.setThreshold(partThresh);
-    
     CheckOSCMessage();
     
     kinect.update();
     if(kinect.isFrameNew()) {
+        colorContourFinder.setThreshold(targetColThresh);
+        colorContourFinder.setMinArea(minContArea);
+        colorContourFinder.setMaxArea(maxContArea);
+        partEffectFinder.setMinArea(minPartEffect);
+        partEffectFinder.setMaxArea(maxPartEffect);
+        partEffectFinder.setThreshold(partThresh);
         
-        UpdateImages();
-        if (saveBk)
-          SaveBackground();
-        
-        switch(state) {
-            case Config:
-                SendMessage("/config/start");
-                state = ConfigScreen;
-                timer = 0;
-                break;
-                
-            case ConfigScreen:
-                ConfigureScreen();
-                break;
-                
-            case ConfigBackground:
-              SaveBackground();
-              SendMessage("/config/done");
-              state = Main;
-
-              ThresholdImages();
-              break;
-                
-            case Main:
-              if(configured) {
-                ThresholdImages();
-                  
+        if (!autoConfigurator.isConfigured()) {
+            dest[0] = ofPoint(0,0);
+            dest[1] = ofPoint(camWidth,0);
+            dest[2] = ofPoint(camWidth,camHeight);
+            dest[3] = ofPoint(0,camHeight);
+            
+            UpdateImages();
+            
+            autoConfigurator.configure(warpedColImg);
+            
+            if (autoConfigurator.isConfigured()) { // Config done
+                SendMessage("/config/done");
+                autoConfigurator.getCorners(dest);
+                UpdateImages();
+                saveBk = true;
+                ofLogNotice("config done");
+            }
+        } else {
+            UpdateImages();
+            
+            if (saveBk)
+                SaveBackground();
+            
+            ThresholdImages();
+            
+            if(configured) {
                 labels.clear();
                 rects.clear();
                 velocities.clear();
                 ballTracker.track(grayImage, &rects, &labels, &velocities);
-
-                for(int i = 0; i < labels.size(); i++) {
-                  if(!ballTracker.colorTracked(labels[i])) {
-                    partEffectFinder.findContours(colImgNoCont);
-                    if(partEffectFinder.size() > 0){
-                      hitPoint = rects[i].getCenter();
-                      ofxCvColorImage tmpColCont;
-                      tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
-                      tmpColCont.setROI(rects[i]);
-                      tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
-
-                      imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-//                      imgToCheck.convertToRange(1,200);
-                      checkForColor(imgToCheck, hitPoint);
-                    }
-                  }
-                  if(!ballTracker.depthTracked(labels[i])) {
-                    hitPoint = rects[i].getCenter();
-                    SendHitMessage("/checkColor", hitPoint, 0);
-//                    ofLogNotice("Blob found");
-                  }
+                
+                if(ballTracker.badConfig()) {
+                    SendMessage("/config/start");
+                    autoConfigurator.reconfigure();
+                    return;
                 }
-              }
-              break;
+                
+                
+                if(labels.size() > 0) {
+                    for(int i = 0; i < labels.size(); i++) {
+                        if(!ballTracker.colorTracked(labels[i])) {
+                            ballTracker.setColorTracked(labels[i]);
+                            partEffectFinder.findContours(colImgNoCont);
+                            if(partEffectFinder.size() > 0) {
+                                ofxCvColorImage tmpColCont;
+                                tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
+                                tmpColCont.setROI(rects[i]);
+                                tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
+                                
+                                imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
+                                hitPoint = rects[i].getCenter();
+                                checkForColor(imgToCheck, hitPoint);
+                                
+//                                ballTracker.setColorTracked(labels[i]);
+                            }
+                        }
+                        if(!ballTracker.depthTracked(labels[i])) {
+                            hitPoint = rects[i].getCenter();
+                            SendHitMessage("/checkColor", hitPoint, 0);
+                        }
+                    }
+                    autoConfigurator.resetTimer();
+                } else {
+                    if(autoConfigurator.updateTimer()) {
+                        dest[0] = ofPoint(0,0);
+                        dest[1] = ofPoint(camWidth,0);
+                        dest[2] = ofPoint(camWidth,camHeight);
+                        dest[3] = ofPoint(0,camHeight);
+                        SendMessage("/config/start");
+                    }
+                }
+            }
         }
-        
     }
-    
 }
 
 //--------------------------------------------------------------
@@ -161,7 +179,7 @@ void testApp::UpdateImages() {
     
     temp_depth.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     temp_scale.scaleIntoMe(temp_depth);
-    grayImage.warpIntoMe(temp_scale, dest, src); //Temp stuff. Gotta clean it up
+    grayImage.warpIntoMe(temp_scale, dest, src); // Temp stuff. Gotta clean it up
 }
 
 //--------------------------------------------------------------
@@ -184,53 +202,53 @@ void testApp::ThresholdImages() {
     warpedColImg = colorPixels;
 }
 
-//--------------------------------------------------------------
-void testApp::ConfigureScreen() {
-    timer++;
-    colorContourFinder.setTargetColor(ofColor::white);
-    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
-    colorContourFinder.resetMaxArea();
-    colorContourFinder.findContours(warpedColImg);
-    
-    //TODO cant just give up like this.
-    if(colorContourFinder.size() < 1) {
-        ofLogNotice("Less than 1 contour(s) found");
-        return;
-    }
-    if(colorContourFinder.size() > 1) {
-        ofLogNotice("More than 1 contour(s) found");
-        return;
-    }
-    
-    if(timer > 10) { //Delay to let front end change scenes
-        const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
-        get_corners(contPts, &contCorners);
-
-        dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
-        dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
-        dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
-        dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
-        
-        ofxXmlSettings settings;
-        settings.addTag("positions");
-        settings.pushTag("positions");
-        for(int i = 0; i < 4; i++){
-          if(dest[i].x != -1 && dest[i].y != -1){
-            settings.addTag("position");
-            settings.pushTag("position", i);
-            settings.setValue("X", dest[i].x);
-            settings.setValue("Y", dest[i].y);
-            settings.popTag();
-          }
-        }
-        settings.popTag();
-        settings.saveFile("points.xml");
-       
-//        SendMessage("/config/done");
-        state = ConfigBackground;
-    }
-}
+////--------------------------------------------------------------
+//void testApp::ConfigureScreen() {
+//    timer++;
+//    colorContourFinder.setTargetColor(ofColor::white);
+//    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
+//    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
+//    colorContourFinder.resetMaxArea();
+//    colorContourFinder.findContours(warpedColImg);
+//    
+//    //TODO cant just give up like this.
+//    if(colorContourFinder.size() < 1) {
+//        ofLogNotice("Less than 1 contour(s) found");
+//        return;
+//    }
+//    if(colorContourFinder.size() > 1) {
+//        ofLogNotice("More than 1 contour(s) found");
+//        return;
+//    }
+//    
+//    if(timer > 10) { //Delay to let front end change scenes
+//        const std::vector<ofPoint> contPts = colorContourFinder.getPolyline(0).getVertices();
+//        get_corners(contPts, &contCorners);
+//
+//        dest[0] = contCorners.tl;//ofPoint(rect.x, rect.y);
+//        dest[1] = contCorners.tr;//ofPoint(rect.x + rect.width, rect.y);
+//        dest[2] = contCorners.br;//ofPoint(rect.x + rect.width, rect.y + rect.height);
+//        dest[3] = contCorners.bl;//ofPoint(rect.x, rect.y + rect.height);
+//        
+//        ofxXmlSettings settings;
+//        settings.addTag("positions");
+//        settings.pushTag("positions");
+//        for(int i = 0; i < 4; i++){
+//          if(dest[i].x != -1 && dest[i].y != -1){
+//            settings.addTag("position");
+//            settings.pushTag("position", i);
+//            settings.setValue("X", dest[i].x);
+//            settings.setValue("Y", dest[i].y);
+//            settings.popTag();
+//          }
+//        }
+//        settings.popTag();
+//        settings.saveFile("points.xml");
+//       
+////        SendMessage("/config/done");
+////        state = ConfigBackground;
+//    }
+//}
 
 //--------------------------------------------------------------
 void testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire) {
@@ -298,8 +316,6 @@ void testApp::SaveBackground() {
     saveBk = false;
     unsigned char* pixels = grayImage.getPixels();
     grayImageDiff.setFromPixels(pixels, camWidth, camHeight);
-    //timer = 0;
-    //state = ConfigBackground;
 }
 
 //--------------------------------------------------------------
@@ -315,22 +331,31 @@ void testApp::draw() {
 
     grayImage.draw(camWidth, 0, camWidth, camHeight);
     grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
-
+    
+//    kinect.drawDepth(camWidth, camHeight*2, camWidth, camHeight);
+    
+//    autoConfigurator.draw();
+    
+    ballTracker.draw();
+    
+    ofSetColor(ofColor::white);
+    partEffectFinder.draw();
+    
     if(configured){
         colorContourFinder.draw();
         contours.draw();
     }else{
         ofxXmlSettings settings;
-        for(int j=0; j<4;j++){
+        for(int j=0; j<4;j++) {
             ofSetColor(255,255,255);
             settings.loadFile("points.xml");
             settings.pushTag("positions");
             settings.pushTag("position", j);
             if(selectedCorner < 0){
-                if(settings.getValue("X", -1) != -1){
+                if(settings.getValue("X", -1) != -1) {
                     dest[j].x = settings.getValue("X", -1);
                 }
-                if(settings.getValue("Y", -1) != -1){
+                if(settings.getValue("Y", -1) != -1) {
                     dest[j].y = settings.getValue("Y", -1);
                 }
             }
@@ -365,22 +390,17 @@ void testApp::draw() {
 
 //--------------------------------------------------------------
 void testApp::CheckOSCMessage() {
-    while(receiver.hasWaitingMessages()){
+    while(receiver.hasWaitingMessages()) {
         // get the next message
         ofxOscMessage m;
         if(receiver.getNextMessage(&m)) {
             string addr = m.getAddress();
             if(addr == "/config/start") {
-                state = ConfigScreen;
-                timer = 0;
-                dest[0] = ofPoint(0,0);
-                dest[1] = ofPoint(camWidth,0);
-                dest[2] = ofPoint(camWidth,camHeight);
-                dest[3] = ofPoint(0,camHeight);
-            } else if(addr == "/startGame") {
-                state = Main;
-            } else if(addr == "/readyCheck") {
-                whiteScreen = true;
+//                dest[0] = ofPoint(0,0);
+//                dest[1] = ofPoint(camWidth,0);
+//                dest[2] = ofPoint(camWidth,camHeight);
+//                dest[3] = ofPoint(0,camHeight);
+                autoConfigurator.reconfigure();
             }
         }
     }

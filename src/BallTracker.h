@@ -35,6 +35,8 @@ public:
         velSmoothRate = p_velSmoothRate;
         
         contourFinder.setUseTargetColor(false);
+        
+        sideBalls = ballCounter = configCounter = 0;
     }
     
     void track(ofxCvGrayscaleImage gray, vector<ofRectangle>* rects, vector<unsigned int>* labels, vector<ofVec2f>* velocities) {
@@ -50,6 +52,8 @@ public:
         contourFinder.setFindHoles(true);
         contourFinder.setMinArea(*minContArea);
         contourFinder.setMaxArea(*maxContArea);
+        
+        gray.blur(1);
         
         contourFinder.findContours(gray);
         
@@ -67,6 +71,8 @@ public:
             labels->push_back(label);
             velocities->push_back(velocityMap[label]);
         }
+        
+        checkConfigIntegrity();
     }
     
     bool depthTracked(unsigned int label) {
@@ -82,7 +88,6 @@ public:
     bool colorTracked(unsigned int label) {
         if(colorCheckedMap.count(label) > 0) {
             if(colorCheckedMap[label] == false) {
-                colorCheckedMap[label] = true;
                 return false;
             }
             return true;
@@ -92,8 +97,25 @@ public:
         }
     }
     
+    void setColorTracked(unsigned int label) {
+        if(colorCheckedMap.count(label) > 0) {
+            colorCheckedMap[label] = true;
+        } else {
+            ofLogNotice("Bad usage? (trackColor func)");
+        }
+    }
+    
+    bool badConfig() {
+        ofLogNotice("total balls: " + ofToString(ballCounter));
+        ofLogNotice("sideBalls: " + ofToString(sideBalls));
+        if(ballCounter > 10 || sideBalls > 5) { // TODO tweak me
+            return true;
+        }
+        return false;
+    }
+    
     void draw() {
-        ofSetColor(ofColor::white);
+        ofSetColor(ofColor::blue);
         contourFinder.draw();
         
         ofxCv::RectTracker& tracker = contourFinder.getTracker();
@@ -107,6 +129,25 @@ public:
     }
 
 private:
+    void checkConfigIntegrity() {
+        configCounter++;
+        if(configCounter > 60) { // Sample every 20 frames for bad stuff
+            ballCounter = sideBalls = 0;
+        }
+        
+        if(contourFinder.size() > 0)
+            ballCounter += contourFinder.size();
+        
+        ofxCv::RectTracker& tracker = contourFinder.getTracker();
+        for(int i = 0; i < contourFinder.size(); i++) {
+            int label = contourFinder.getLabel(i);
+            ofVec2f pos = ofxCv::toOf(tracker.getCurrent(label)).getCenter();
+            if(pos.x < 20 || pos.x > 320 - 20) { //FIXME hardcoding camWidth
+                sideBalls++;
+            }
+        }
+    }
+    
     void updateVelocity() {
         for(int i = 0; i < contourFinder.size(); i++) {
             ofVec2f cur = ofxCv::toOf(contourFinder.getVelocity(i));
@@ -172,6 +213,8 @@ private:
     int* minContArea;
     int* maxContArea;
     float* velSmoothRate;
+    
+    unsigned int ballCounter, sideBalls, configCounter;
     
     std::map<unsigned int, ofVec2f> velocityMap;
     std::map<unsigned int, bool> colorCheckedMap;
