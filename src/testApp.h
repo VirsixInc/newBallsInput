@@ -109,7 +109,7 @@ private:
     int amtOfPlayers, votesReq;
     float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
     
-    bool configThreshold;
+    int configThreshold;
     
     bool whiteScreen;
     bool flip;
