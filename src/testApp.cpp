@@ -53,7 +53,8 @@ void testApp::setup() {
     players[2].ballColor = ofColor(0,255,0);
     players[3].ballColor = ofColor(0,255,0);
     
-    gui.addSlider("First Col Thresh", targetColThresh, 0, 255);
+    //gui.addSlider("First Col Thresh", targetColThresh, 0, 255);
+	gui.addSlider("configThreshold", configThreshold, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 80);
     gui.addSlider("minContArea", minContArea, 0, 1000);
@@ -188,8 +189,8 @@ void testApp::ThresholdImages() {
 void testApp::ConfigureScreen() {
     timer++;
     colorContourFinder.setTargetColor(ofColor::white);
-    colorContourFinder.setMinArea(100); // TODO tweak. Seems good tho.
-    colorContourFinder.setThreshold(100); // TODO tweak. Seems good tho.
+    colorContourFinder.setMinArea(300); // TODO tweak. Seems good tho.
+    colorContourFinder.setThreshold(configThreshold); // TODO tweak. Seems good tho.
     colorContourFinder.resetMaxArea();
     colorContourFinder.findContours(warpedColImg);
     
