@@ -1,7 +1,7 @@
 <controls>
     <SliderInt_First_Col_Thresh>
         <name>First Col Thresh</name>
-        <value>88</value>
+        <value>118</value>
     </SliderInt_First_Col_Thresh>
     <SliderInt_Depth_Thresh>
         <name>Depth Thresh</name>
@@ -9,19 +9,19 @@
     </SliderInt_Depth_Thresh>
     <SliderInt_Range>
         <name>Range</name>
-        <value>13</value>
+        <value>14</value>
     </SliderInt_Range>
     <SliderInt_minContArea>
         <name>minContArea</name>
-        <value>440</value>
+        <value>260</value>
     </SliderInt_minContArea>
     <SliderInt_maxContArea>
         <name>maxContArea</name>
-        <value>1518</value>
+        <value>1260</value>
     </SliderInt_maxContArea>
     <SliderInt_minPartEffect>
         <name>minPartEffect</name>
-        <value>1200</value>
+        <value>800</value>
     </SliderInt_minPartEffect>
     <SliderInt_maxPartEffect>
         <name>maxPartEffect</name>
@@ -29,7 +29,7 @@
     </SliderInt_maxPartEffect>
     <SliderInt_partThresh>
         <name>partThresh</name>
-        <value>113</value>
+        <value>80</value>
     </SliderInt_partThresh>
     <SliderFloat_minVariationDistance>
         <name>minVariationDistance</name>
