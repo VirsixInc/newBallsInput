@@ -53,7 +53,7 @@ public:
         contourFinder.setMinArea(*minContArea);
         contourFinder.setMaxArea(*maxContArea);
         
-        gray.blur(1);
+        
         
         contourFinder.findContours(gray);
         
@@ -105,6 +105,19 @@ public:
         }
     }
     
+    bool colorFound(unsigned int label, int color) {
+        if(color == 0) {
+            colorMap[label].first++;
+        } else {
+            colorMap[label].second++;
+        }
+        
+        if(colorMap[label].first > 2 || colorMap[label].second > 2) {
+            return true;
+        }
+        return false;
+    }
+    
     bool badConfig() {
         ofLogNotice("total balls: " + ofToString(ballCounter));
         ofLogNotice("sideBalls: " + ofToString(sideBalls));
@@ -115,7 +128,6 @@ public:
     }
     
     void draw() {
-        ofSetColor(ofColor::blue);
         contourFinder.draw();
         
         ofxCv::RectTracker& tracker = contourFinder.getTracker();
@@ -185,6 +197,13 @@ private:
         }
     }
     
+    void updateColorMap() {
+        vector<unsigned int> deadLabels = contourFinder.getTracker().getDeadLabels();
+        for(int i = 0 ; i < deadLabels.size(); i++) {
+            colorMap.erase(deadLabels[i]);
+        }
+    }
+    
     void logInfo() {
         for(int i = 0; i < contourFinder.size(); i++) {
             ofxCv::RectTracker& tracker = contourFinder.getTracker();
@@ -218,6 +237,7 @@ private:
     
     std::map<unsigned int, ofVec2f> velocityMap;
     std::map<unsigned int, bool> colorCheckedMap;
+    std::map<unsigned int, std::pair<unsigned int, unsigned int> > colorMap;
     
     ofxCv::ContourFinder contourFinder;
 };

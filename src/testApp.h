@@ -40,9 +40,10 @@ private:
     void UpdateImages();
     void ConfigureScreen();
     void ThresholdImages();
-    void checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire);
     void resetPoints();
     void savePoints();
+    
+    int checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire);
     
     void SaveBackground();
     
@@ -57,10 +58,10 @@ private:
     Corners contCorners;
     
 //    State state;
-    float threshold;
+//    float threshold;
     
-    ofxCv::ContourFinder colorContourFinder, partEffectFinder;
-    ofxCv::TrackingColorMode trackingColorMode;
+    ofxCv::ContourFinder partEffectFinder;//, colorContourFinder;
+//    ofxCv::TrackingColorMode trackingColorMode;
     
     ofxOscSender sender;
     ofxOscReceiver receiver;
@@ -72,9 +73,9 @@ private:
     
     ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color, imgToCheck;
     
-    ofxCvContourFinder contours, colorContours;
+//    ofxCvContourFinder contours, colorContours;
     
-    ofColor colorJustAcquired, colorJustAcquired2;
+//    ofColor colorJustAcquired, colorJustAcquired2;
     
     ofxSimpleGuiToo gui;
     
@@ -93,31 +94,20 @@ private:
     //AutoConfigurator stuff
     AutoConfigurator autoConfigurator;
     
+    bool saveBk, resetPts, configured;
     
-//    typedef std::pair<ofRectangle, unsigned int> rectSeenPair;
-//    std::map<unsigned int, ofRectangle> labelMap;
+    static const int amtOfPlayers = 2;
+    ballPlayer players[amtOfPlayers];
+
+    int camWidth, camHeight;
+    int range, depthThresh;
+    int minPartEffect, maxPartEffect, partThreshLevel;
+    int partThreshLevels[6];
     
-    bool passedColor, idSet, saveBk, resetPts, timerEngaged, configured, savePts, colorConfig;
+    int kinectTimeout;
     
-    ballPlayer players[4];
-    long amtOfWhitePixels, hue, sat, bri;
-    int colorToConfig[3];
-    int targetColThresh,hueRange, satRange, briRange;
-    int id, configId, round;
-    int camWidth, camHeight, kinWidth, kinHeight;
-    int range, objThresh, depthThresh, secondColThresh;
-    int minPartEffect, maxPartEffect, partThresh;
-    int port;
-    int amtOfPlayers, votesReq;
-    float timeSinceLastSend, timeSinceLastWhiteFound, lastTime, prevRow;
-    
-    bool whiteScreen;
     bool flip;
-    
-    unsigned int timer;
     
     ofPoint src[4];
     ofPoint dest[4];
-    
-    int selectedCorner;
 };
