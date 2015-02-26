@@ -50,15 +50,26 @@ void testApp::setup() {
     partThreshLevels[4] = 120;
     partThreshLevels[5] = 130;
     
-//    vector<ofxSimpleGuiPage *> pages = gui.getPages();
-//    for(int i = 0; i < pages.size(); i++) {
-//        gui.page(i).setXMLName("/Users/virsix/Desktop/of_v0.8.4_osx_release/apps/myApps/ballsInputMacv2/");
-//    }
+
+//#if __APPLE__
+#if __linux__
+    ofLogNotice("Linux OS. Moving _settings.xml");
+
+    
+    ofFile f;
+    if(false == f.doesFileExist("/home/_settings.xml", false)) {
+        f.open("_settings.xml");
+//        f.open("_settings.xml", ofFile::ReadWrite);
+        f.copyTo("/home/_settings.xml", false);
+    }
+    
     gui.setup();
     vector<ofxSimpleGuiPage *> pages = gui.getPages();
     for(int i = 0; i < pages.size(); i++) {
-        gui.page(i).setXMLName("/Users/virsix/Desktop/of_v0.8.4_osx_release/apps/myApps/ballsInputMacv2/_settings.xml");
+        gui.page(i).setXMLName("/home/_settings.xml");
     }
+    
+#endif
     
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 80);
@@ -272,21 +283,6 @@ int testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire) {
     ofLogNotice(ofToString(color) + "=color");
     
     return color;
-    
-    //----------------------------------------------------------------------
-    
-//    //-----------------------Contour finder method (DEPRECIATED)--------------------------
-//  for(int i = 0;i<amtOfPlayers;i++){
-//    colorContourFinder.setTargetColor(players[i].ballColor,ofxCv::TRACK_COLOR_HSV);
-//    colorContourFinder.findContours(imageInQuestion);
-//    if(colorContourFinder.size() > 0){
-//        ofLogNotice("PLAYER FOUND: " + ofToString(i));
-//        players[i].ballFound = true;
-//        SendHitMessage("/shoot", ptToFire, i);
-//        break;
-//    }
-//  }
-//    //----------------------------------------------------------------------
 }
 //--------------------------------------------------------------
 void testApp::SaveBackground() {
