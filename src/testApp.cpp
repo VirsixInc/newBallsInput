@@ -58,16 +58,16 @@ void testApp::setup() {
     
     
     ofFile f;
-    if(false == f.doesFileExist("/home/_settings.xml", false)) {
+    if(false == f.doesFileExist("/home/dodgeball/_settings.xml", false)) {
         f.open("_settings.xml");
-        //        f.open("_settings.xml", ofFile::ReadWrite);
-        f.copyTo("/home/_settings.xml", false);
+//        f.open("_settings.xml", ofFile::ReadWrite);
+        f.copyTo("/home/dodgeball/_settings.xml", false);
     }
     
     gui.setup();
     vector<ofxSimpleGuiPage *> pages = gui.getPages();
     for(int i = 0; i < pages.size(); i++) {
-        gui.page(i).setXMLName("/home/_settings.xml");
+        gui.page(i).setXMLName("/home/dodgeball/_settings.xml");
     }
     
 #endif
