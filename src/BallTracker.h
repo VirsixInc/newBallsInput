@@ -93,7 +93,6 @@ public:
     }
     
     void draw() {
-        ofSetColor(ofColor::white);
         contourFinder.draw();
         
         ofxCv::RectTracker& tracker = contourFinder.getTracker();

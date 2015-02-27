@@ -53,6 +53,25 @@ void testApp::setup() {
     players[2].ballColor = ofColor(0,255,0);
     players[3].ballColor = ofColor(0,255,0);
     
+#if __linux__
+    ofLogNotice("Linux OS. Moving _settings.xml");
+    
+    
+    ofFile f;
+    if(false == f.doesFileExist("/home/_settings.xml", false)) {
+        f.open("_settings.xml");
+        //        f.open("_settings.xml", ofFile::ReadWrite);
+        f.copyTo("/home/_settings.xml", false);
+    }
+    
+    gui.setup();
+    vector<ofxSimpleGuiPage *> pages = gui.getPages();
+    for(int i = 0; i < pages.size(); i++) {
+        gui.page(i).setXMLName("/home/_settings.xml");
+    }
+    
+#endif
+    
     //gui.addSlider("First Col Thresh", targetColThresh, 0, 255);
 	gui.addSlider("configThreshold", configThreshold, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
@@ -305,20 +324,26 @@ void testApp::SaveBackground() {
 
 //--------------------------------------------------------------
 void testApp::draw() {
-    ofSetHexColor(0xff0000);
+    ofSetColor(ofColor::white);
     
-    ofSetColor(255, 255, 255);
-    colImgNoCont.draw(0,0,camWidth,camHeight);
-    kinect.draw(camWidth*2,camHeight,camWidth,camHeight);
+    kinect.draw(0, 0, camWidth, camHeight);
+    colImgNoCont.draw(camWidth, 0, camWidth, camHeight);
+    imgToCheck.draw(camWidth*2, 0);
+    grayImage.draw(0, camHeight, camWidth, camHeight);
+    warpedColImg.draw(camWidth, camHeight, camWidth, camHeight);
+    
+    ofSetColor(30, 255, 30);
+    colorContourFinder.draw();
+//    autoConfigurator.draw();
+    
+    ofSetColor(3, 3, 255);
+    ballTracker.draw();
+    
+    ofSetColor(ofColor::white);
     partEffectFinder.draw();
-    imgToCheck.draw(0, camHeight);
-    warpedColImg.draw(camWidth*2,0);
-
-    grayImage.draw(camWidth, 0, camWidth, camHeight);
-    grayImageDiff.draw(camWidth, camHeight, camWidth, camHeight);
 
     if(configured){
-        colorContourFinder.draw();
+        
         contours.draw();
     }else{
         ofxXmlSettings settings;
@@ -454,12 +479,12 @@ void testApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
     
-    selectedCorner = -1;
-    if(selectedCorner == -1 && idSet){
-        idSet = false;
-        colorJustAcquired = warpedColImg.getPixelsRef().getColor(x, y);
-        ofLogNotice(ofToString(x) + "  " + ofToString(y));
-        players[id].ballColor = colorJustAcquired;
-        colorContourFinder.setTargetColor(players[id].ballColor,ofxCv::TRACK_COLOR_HSV);
-    }
+//    selectedCorner = -1;
+//    if(selectedCorner == -1 && idSet){
+//        idSet = false;
+//        colorJustAcquired = warpedColImg.getPixelsRef().getColor(x, y);
+//        ofLogNotice(ofToString(x) + "  " + ofToString(y));
+//        players[id].ballColor = colorJustAcquired;
+//        colorContourFinder.setTargetColor(players[id].ballColor,ofxCv::TRACK_COLOR_HSV);
+//    }
 }
