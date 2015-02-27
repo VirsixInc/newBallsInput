@@ -50,8 +50,6 @@ void testApp::setup() {
     partThreshLevels[4] = 120;
     partThreshLevels[5] = 130;
     
-
-//#if __APPLE__
 #if __linux__
     ofLogNotice("Linux OS. Moving _settings.xml");
 
@@ -170,15 +168,15 @@ void testApp::update() {
 //                            SendHitMessage("/checkColor", hitPoint, 0);
 //                        }
                     }
-                    autoConfigurator.resetTimer();
+//                    autoConfigurator.resetTimer();
                 } else {
-                    if(autoConfigurator.updateTimer()) {
-                        dest[0] = ofPoint(0,0);
-                        dest[1] = ofPoint(camWidth,0);
-                        dest[2] = ofPoint(camWidth,camHeight);
-                        dest[3] = ofPoint(0,camHeight);
-                        SendMessage("/config/start");
-                    }
+//                    if(autoConfigurator.updateTimer()) {
+//                        dest[0] = ofPoint(0,0);
+//                        dest[1] = ofPoint(camWidth,0);
+//                        dest[2] = ofPoint(camWidth,camHeight);
+//                        dest[3] = ofPoint(0,camHeight);
+//                        SendMessage("/config/start");
+//                    }
                 }
             }
         }
@@ -295,20 +293,19 @@ void testApp::SaveBackground() {
 void testApp::draw() {
     ofSetColor(ofColor::white);
     
-    warpedColImg.draw(0, 0, camWidth, camHeight);
+    kinect.draw(0, 0, camWidth, camHeight);
     colImgNoCont.draw(camWidth, 0, camWidth, camHeight);
-    warpedColImg.draw(camWidth*2,0);
-    imgToCheck.draw(0, camHeight);
-    grayImage.draw(camWidth, camHeight, camWidth, camHeight);
-    kinect.draw(camWidth*2,camHeight,camWidth,camHeight);
+    imgToCheck.draw(camWidth*2, 0);
+    grayImage.draw(0, camHeight, camWidth, camHeight);
+    warpedColImg.draw(camWidth, camHeight, camWidth, camHeight);
     
     ofSetColor(ofColor::white);
     partEffectFinder.draw();
 
-    ofSetColor(255, 0, 0);
+    ofSetColor(30, 255, 30);
     autoConfigurator.draw();
     
-    ofSetColor(0, 0, 255);
+    ofSetColor(3, 3, 255);
     ballTracker.draw();
     
     ofSetColor(ofColor::white);
