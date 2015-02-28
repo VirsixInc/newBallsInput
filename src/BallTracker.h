@@ -112,7 +112,7 @@ public:
             colorMap[label].second++;
         }
         
-        if(colorMap[label].first > 2 || colorMap[label].second > 2) {
+        if(colorMap[label].first > 1 || colorMap[label].second > 1) {
             return true;
         }
         return false;
