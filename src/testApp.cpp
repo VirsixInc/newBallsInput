@@ -11,10 +11,8 @@ void testApp::setup() {
     kinect.init();
     kinect.open();                // Opens first available kinect
     
-    
     camWidth = 320;
     camHeight = 240;
-
     
     colImg.allocate(camWidth, camHeight);
     grayImage.allocate(camWidth, camHeight);
@@ -43,12 +41,12 @@ void testApp::setup() {
     players[0].ballColor = ofColor(255,0,0);
     players[1].ballColor = ofColor(0,255,0);
 
-    partThreshLevels[0] = 90;
-    partThreshLevels[1] = 100;
-    partThreshLevels[2] = 110;
-    partThreshLevels[3] = 115;
-    partThreshLevels[4] = 120;
-    partThreshLevels[5] = 130;
+//    partThreshLevels[0] = 90;
+//    partThreshLevels[1] = 100;
+//    partThreshLevels[2] = 110;
+//    partThreshLevels[3] = 115;
+//    partThreshLevels[4] = 120;
+//    partThreshLevels[5] = 130;
     
 #if __linux__
     ofLogNotice("Linux OS. Moving _settings.xml");
@@ -66,27 +64,29 @@ void testApp::setup() {
     }
     
 #endif
-    
+//    gui.setAlignRight(true);
+    gui.addSlider("configThreshold", configThreshold, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 80);
     gui.addSlider("minContArea", minContArea, 0, 1000);
     gui.addSlider("maxContArea", maxContArea, 0, 2000);
-    gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
-    gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
-    gui.addSlider("partThresh", partThreshLevel, 0, 5);
-    gui.addSlider("minVariationDistance", minVariationDistance, 0.01, 1000.0);
+//    gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
+//    gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
+    gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
     gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
     gui.addSlider("lifeTime", lifeTime, 0, 150);
     gui.addToggle("Configured", configured);
     gui.addToggle("Save Background", saveBk);
     gui.addToggle("Flip", flip);
+    gui.setAlignRight(true);
+//    gui.config->fullColor = 
     gui.loadFromXML();
     
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
 
-    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
+//    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
     
-    autoConfigurator.init(camWidth, camHeight);
+    autoConfigurator.init(camWidth, camHeight, &configThreshold);
     
     SendMessage("/config/start");
     kinectTimeout = 0;
@@ -99,9 +99,9 @@ void testApp::update() {
     kinect.update();
     if(kinect.isFrameNew()) {
         kinectTimeout = 0;
-        partEffectFinder.setMinArea(minPartEffect);
-        partEffectFinder.setMaxArea(maxPartEffect);
-        partEffectFinder.setThreshold(partThreshLevels[partThreshLevel]);
+//        partEffectFinder.setMinArea(minPartEffect);
+//        partEffectFinder.setMaxArea(maxPartEffect);
+//        partEffectFinder.setThreshold(partThreshLevels[partThreshLevel]);
         
         if (!autoConfigurator.isConfigured()) {
             dest[0] = ofPoint(0,0);
@@ -117,6 +117,7 @@ void testApp::update() {
                 SendMessage("/config/done");
                 autoConfigurator.getCorners(dest);
                 UpdateImages();
+                SaveBackground();
                 saveBk = true;
             }
         } else {
@@ -134,56 +135,37 @@ void testApp::update() {
                 grayImage.blur(1);
                 ballTracker.track(grayImage, &rects, &labels, &velocities);
                 
-//                if(ballTracker.badConfig()) {
-//                    SendMessage("/config/start");
-//                    autoConfigurator.reconfigure();
-//                    return;
-//                }
-                
                 if(labels.size() > 0) {
                     for(int i = 0; i < labels.size(); i++) {
                         if(!ballTracker.colorTracked(labels[i])) {
-//                            partEffectFinder.findContours(colImgNoCont);
-//                            if(partEffectFinder.size() > 0) {
                             ofxCvColorImage tmpColCont;
                             tmpColCont.setFromPixels(warpedColImg.getPixelsRef());
                             tmpColCont.setROI(rects[i]);
                             tmpColCont.setFromPixels(tmpColCont.getRoiPixelsRef());
                                 
                             imgToCheck.setFromPixels(tmpColCont.getRoiPixelsRef());
-                            hitPoint = rects[i].getCenter();
-                            int color = checkForColor(imgToCheck, hitPoint); // Remove hitPoint
+                            ofPoint hitPoint = rects[i].getCenter();
+                            int color = checkForColor(imgToCheck, hitPoint);
                             
-//                            ballTracker.setColor(labels[i], color);
                             if(ballTracker.colorFound(labels[i], color)) {
                                 ballTracker.setColorTracked(labels[i]);
                                 SendHitMessage("/shoot", hitPoint, color);
                             }
-//                            }
                         }
 //                        if(!ballTracker.depthTracked(labels[i])) {
 //                            hitPoint = rects[i].getCenter();
 //                            SendHitMessage("/checkColor", hitPoint, 0);
 //                        }
                     }
-//                    autoConfigurator.resetTimer();
-                } else {
-//                    if(autoConfigurator.updateTimer()) {
-//                        dest[0] = ofPoint(0,0);
-//                        dest[1] = ofPoint(camWidth,0);
-//                        dest[2] = ofPoint(camWidth,camHeight);
-//                        dest[3] = ofPoint(0,camHeight);
-//                        SendMessage("/config/start");
-//                    }
                 }
             }
         }
     } else {
         kinectTimeout++;
-        if(kinectTimeout == 1200) {
+        if(kinectTimeout == 2000) {
             SendMessage("/config/noKinect");
         }
-        if(kinectTimeout > 1200 && kinectTimeout % 100 == 0) {
+        if(kinectTimeout > 2000 && kinectTimeout % 100 == 0) {
             kinect.open();
             if(kinect.isConnected()) {
                 SendMessage("/config/kinectFound");
@@ -274,7 +256,7 @@ int testApp::checkForColor(ofxCvColorImage imageInQuestion, ofPoint ptToFire) {
             color = i;
         
     }
-    if(color == 1)
+    if(color == 1) // Lazy. Cuz in Unity 3 is green
         color = 3;
     ofLogNotice(ofToString(color) + "=color");
     
@@ -297,17 +279,17 @@ void testApp::draw() {
     grayImage.draw(0, camHeight, camWidth, camHeight);
     warpedColImg.draw(camWidth, camHeight, camWidth, camHeight);
     
-    ofSetColor(ofColor::white);
-    partEffectFinder.draw();
+//    ofSetColor(ofColor::white);
+//    partEffectFinder.draw();
 
     ofSetColor(30, 255, 30);
     autoConfigurator.draw();
     
-    ofSetColor(3, 3, 255);
+    ofSetColor(30, 30, 255);
     ballTracker.draw();
     
-    ofSetColor(ofColor::white);
-    partEffectFinder.draw();
+//    ofSetColor(ofColor::white);
+//    partEffectFinder.draw();
     
     if(!configured){
         ofSetColor(0, 0, 255);
@@ -383,9 +365,13 @@ void testApp::exit() {
 }
 //--------------------------------------------------------------
 void testApp::keyPressed (int key) {
-    switch(key){
+    switch(key) {
         case OF_KEY_LEFT:
             gui.toggleDraw();
+            break;
+//        case OF_KEY_F1:
+//            autoConfigurator.configDone = true;
+//            break;
     }
 }
 

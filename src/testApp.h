@@ -22,9 +22,6 @@ struct ballPlayer{
 class testApp : public ofBaseApp {
     
 public:
-//    enum State {
-//        ConfigBackground, Main, ConfigScreen, Config
-//    };
     void setup();
     void update();
     void draw();
@@ -60,8 +57,7 @@ private:
 //    State state;
 //    float threshold;
     
-    ofxCv::ContourFinder partEffectFinder;//, colorContourFinder;
-//    ofxCv::TrackingColorMode trackingColorMode;
+//    ofxCv::ContourFinder partEffectFinder;
     
     ofxOscSender sender;
     ofxOscReceiver receiver;
@@ -69,13 +65,8 @@ private:
     ofxKinect kinect;
     
     ofxCvGrayscaleImage grayImageDiff, grayImage, grayForColor, temp_depth, temp_scale;
-    ofPoint hitPoint;
     
     ofxCvColorImage colImgNoCont, colImg, warpedColImg, temp_color, imgToCheck;
-    
-//    ofxCvContourFinder contours, colorContours;
-    
-//    ofColor colorJustAcquired, colorJustAcquired2;
     
     ofxSimpleGuiToo gui;
     
@@ -93,6 +84,7 @@ private:
     
     //AutoConfigurator stuff
     AutoConfigurator autoConfigurator;
+    //----------------------
     
     bool saveBk, resetPts, configured;
     
@@ -101,8 +93,9 @@ private:
 
     int camWidth, camHeight;
     int range, depthThresh;
-    int minPartEffect, maxPartEffect, partThreshLevel;
-    int partThreshLevels[6];
+//    int minPartEffect, maxPartEffect, partThreshLevel;
+    int configThreshold;
+//    int partThreshLevels[6];
     
     int kinectTimeout;
     

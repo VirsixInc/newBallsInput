@@ -53,8 +53,6 @@ public:
         contourFinder.setMinArea(*minContArea);
         contourFinder.setMaxArea(*maxContArea);
         
-        
-        
         contourFinder.findContours(gray);
         
         updateVelocity();
@@ -72,7 +70,7 @@ public:
             velocities->push_back(velocityMap[label]);
         }
         
-        checkConfigIntegrity();
+        //checkConfigIntegrity();
     }
     
     bool depthTracked(unsigned int label) {
@@ -101,7 +99,7 @@ public:
         if(colorCheckedMap.count(label) > 0) {
             colorCheckedMap[label] = true;
         } else {
-            ofLogNotice("Bad usage? (trackColor func)");
+            ofLogNotice("Bad usage? (setColorTracked func)");
         }
     }
     
@@ -118,14 +116,15 @@ public:
         return false;
     }
     
-    bool badConfig() {
-        ofLogNotice("total balls: " + ofToString(ballCounter));
-        ofLogNotice("sideBalls: " + ofToString(sideBalls));
-        if(ballCounter > 10 || sideBalls > 5) { // TODO tweak me
-            return true;
-        }
-        return false;
-    }
+    // DEPRECIATED
+//    bool badConfig() {
+//        ofLogNotice("total balls: " + ofToString(ballCounter));
+//        ofLogNotice("sideBalls: " + ofToString(sideBalls));
+//        if(ballCounter > 10 || sideBalls > 5) { // TODO tweak me
+//            return true;
+//        }
+//        return false;
+//    }
     
     void draw() {
         contourFinder.draw();
@@ -141,24 +140,25 @@ public:
     }
 
 private:
-    void checkConfigIntegrity() {
-        configCounter++;
-        if(configCounter > 60) { // Sample every 20 frames for bad stuff
-            ballCounter = sideBalls = 0;
-        }
-        
-        if(contourFinder.size() > 0)
-            ballCounter += contourFinder.size();
-        
-        ofxCv::RectTracker& tracker = contourFinder.getTracker();
-        for(int i = 0; i < contourFinder.size(); i++) {
-            int label = contourFinder.getLabel(i);
-            ofVec2f pos = ofxCv::toOf(tracker.getCurrent(label)).getCenter();
-            if(pos.x < 20 || pos.x > 320 - 20) { //FIXME hardcoding camWidth
-                sideBalls++;
-            }
-        }
-    }
+    //DEPRECIATED
+//    void checkConfigIntegrity() {
+//        configCounter++;
+//        if(configCounter > 60) { // Sample every 20 frames for bad stuff
+//            ballCounter = sideBalls = 0;
+//        }
+//        
+//        if(contourFinder.size() > 0)
+//            ballCounter += contourFinder.size();
+//        
+//        ofxCv::RectTracker& tracker = contourFinder.getTracker();
+//        for(int i = 0; i < contourFinder.size(); i++) {
+//            int label = contourFinder.getLabel(i);
+//            ofVec2f pos = ofxCv::toOf(tracker.getCurrent(label)).getCenter();
+//            if(pos.x < 20 || pos.x > 320 - 20) { //FIXME hardcoding camWidth
+//                sideBalls++;
+//            }
+//        }
+//    }
     
     void updateVelocity() {
         for(int i = 0; i < contourFinder.size(); i++) {
