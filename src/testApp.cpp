@@ -72,15 +72,20 @@ void testApp::setup() {
     gui.addSlider("maxContArea", maxContArea, 0, 2000);
 //    gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
 //    gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
-    gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
-    gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
-    gui.addSlider("lifeTime", lifeTime, 0, 150);
+//    gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
+    //gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
+//    gui.addSlider("lifeTime", lifeTime, 0, 150);
     gui.addToggle("Configured", configured);
     gui.addToggle("Save Background", saveBk);
-    gui.addToggle("Flip", flip);
+//    gui.addToggle("Flip", flip);
     gui.setAlignRight(true);
 //    gui.config->fullColor = 
     gui.loadFromXML();
+    
+    velSmoothRate = 0.775f; //Hardcoding for production version. Values still changeable
+    lifeTime = 19;
+    minVariationDistance = 75.0f;
+    flip = true;
     
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
 
@@ -325,7 +330,8 @@ void testApp::CheckOSCMessage() {
         if(receiver.getNextMessage(&m)) {
             string addr = m.getAddress();
             if(addr == "/config/start") {
-                autoConfigurator.reconfigure();
+//                if(autoConfigurator.isConfigured())
+                    autoConfigurator.reconfigure();
             }
         }
     }
@@ -372,6 +378,11 @@ void testApp::keyPressed (int key) {
 //        case OF_KEY_F1:
 //            autoConfigurator.configDone = true;
 //            break;
+        case 'c':
+            SendMessage("/config/start");
+            autoConfigurator.reconfigure();
+            break;
+        
     }
 }
 
