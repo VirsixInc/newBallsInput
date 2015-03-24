@@ -27,12 +27,13 @@ public:
     BallTracker() { }
     ~BallTracker() { }
     
-    void init(int* p_persistence, float* p_maxDistance, int* p_minContArea, int* p_maxContArea, float*p_velSmoothRate) {
+    void init(int* p_persistence, float* p_maxDistance, int* p_minContArea, int* p_maxContArea, float*p_velSmoothRate, int* p_samples) {
         persistence = p_persistence;
         maxDistance = p_maxDistance;
         minContArea = p_minContArea;
         maxContArea = p_maxContArea;
         velSmoothRate = p_velSmoothRate;
+	samples = p_samples;
         
         contourFinder.setUseTargetColor(false);
         
@@ -62,7 +63,7 @@ public:
         logInfo();
 #endif
         
-        for(int i = 0; i < contourFinder.size(); i++) {
+        for(unsigned int i = 0; i < contourFinder.size(); i++) {
             int label = contourFinder.getLabel(i);
             cv::Rect_<int> rect = tracker.getCurrent(label);
             rects->push_back(ofxCv::toOf(rect));
@@ -75,7 +76,7 @@ public:
     
     bool depthTracked(unsigned int label) {
         vector<unsigned int> newLabels = contourFinder.getTracker().getNewLabels();
-        for(int i = 0; i < newLabels.size(); i++) {
+        for(unsigned int i = 0; i < newLabels.size(); i++) {
             if(label == newLabels[i]) {
                 return false;
             }
@@ -110,7 +111,7 @@ public:
             colorMap[label].second++;
         }
         
-        if(colorMap[label].first > 1 || colorMap[label].second > 1) {
+        if(colorMap[label].first > *samples || colorMap[label].second > *samples) {
             return true;
         }
         return false;
@@ -131,7 +132,7 @@ public:
         
         ofxCv::RectTracker& tracker = contourFinder.getTracker();
         ofSetColor(ofColor::teal);
-        for(int i = 0; i < contourFinder.size(); i++) {
+        for(unsigned int i = 0; i < contourFinder.size(); i++) {
             int label = contourFinder.getLabel(i);
             ofVec2f pos = ofxCv::toOf(tracker.getCurrent(label)).getCenter();
             ofVec2f vel = velocityMap[label];
@@ -232,7 +233,8 @@ private:
     int* minContArea;
     int* maxContArea;
     float* velSmoothRate;
-    
+	int* samples;    
+
     unsigned int ballCounter, sideBalls, configCounter;
     
     std::map<unsigned int, ofVec2f> velocityMap;

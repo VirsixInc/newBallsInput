@@ -75,6 +75,7 @@ void testApp::setup() {
     gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
     gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
     gui.addSlider("lifeTime", lifeTime, 0, 150);
+	gui.addSlider("colorSamples", colorSamples, 0, 4);
     gui.addToggle("Configured", configured);
     gui.addToggle("Save Background", saveBk);
     gui.addToggle("Flip", flip);
@@ -82,7 +83,7 @@ void testApp::setup() {
 //    gui.config->fullColor = 
     gui.loadFromXML();
     
-    ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
+    ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate, &colorSamples);
 
 //    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
     
