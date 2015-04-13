@@ -68,21 +68,28 @@ void testApp::setup() {
     gui.addSlider("configThreshold", configThreshold, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 80);
-    gui.addSlider("minContArea", minContArea, 0, 1000);
-    gui.addSlider("maxContArea", maxContArea, 0, 2000);
+//    gui.addSlider("minContArea", minContArea, 0, 1000);
+//    gui.addSlider("maxContArea", maxContArea, 0, 2000);
 //    gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
 //    gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
-    gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
-    gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
-    gui.addSlider("lifeTime", lifeTime, 0, 150);
-	gui.addSlider("colorSamples", colorSamples, 0, 4);
-    gui.addToggle("Configured", configured);
+//    gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
+//    gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
+//    gui.addSlider("lifeTime", lifeTime, 0, 150);
+    gui.addSlider("colorSamples", colorSamples, 0, 4);
+//    gui.addToggle("Configured", configured);
     gui.addToggle("Save Background", saveBk);
     gui.addToggle("Flip", flip);
     gui.setAlignRight(true);
 //    gui.config->fullColor = 
     gui.loadFromXML();
-    
+
+    velSmoothRate = 0.775f; //Hardcoding for production version. Values still changeable
+    minContArea = 260;
+    maxContArea = 1260;
+    minVariationDistance = 65.0f;
+    lifeTime = 19;
+    configured = true;
+
     ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate, &colorSamples);
 
 //    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
