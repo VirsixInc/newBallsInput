@@ -101,7 +101,8 @@ private:
     int kinectTimeout;
     
     bool flip;
-    
+ 	
+	bool needsConfiguring;   
     ofPoint src[4];
     ofPoint dest[4];
 };

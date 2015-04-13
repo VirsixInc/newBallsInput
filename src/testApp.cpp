@@ -95,8 +95,8 @@ void testApp::setup() {
 //    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
     
     autoConfigurator.init(camWidth, camHeight, &configThreshold);
-    
-    SendMessage("/config/start");
+    needsConfiguring = true;
+    //SendMessage("/config/start");
     kinectTimeout = 0;
 }
 
@@ -106,6 +106,11 @@ void testApp::update() {
     
     kinect.update();
     if(kinect.isFrameNew()) {
+	if(needsConfiguring) {
+		ofLogNotice("started");
+		SendMessage("config/start");
+		needsConfiguring = false;
+	}
         kinectTimeout = 0;
 //        partEffectFinder.setMinArea(minPartEffect);
 //        partEffectFinder.setMaxArea(maxPartEffect);
