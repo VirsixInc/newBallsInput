@@ -75,7 +75,8 @@ private:
     vector<ofRectangle> rects;
     vector<unsigned int> labels;
     vector<ofVec2f> velocities;
-    
+ 
+	int colorSamples;   
     float minVariationDistance;
     int lifeTime;
     float velSmoothRate;
@@ -100,7 +101,8 @@ private:
     int kinectTimeout;
     
     bool flip;
-    
+ 	
+	bool needsConfiguring;   
     ofPoint src[4];
     ofPoint dest[4];
 };

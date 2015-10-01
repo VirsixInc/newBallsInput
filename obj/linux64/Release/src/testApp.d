@@ -26,6 +26,7 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../libs/poco/include/Poco/Mutex_POSIX.h \
  ../../../libs/openFrameworks/utils/ofSystemUtils.h \
  ../../../libs/openFrameworks/utils/ofThread.h \
+ ../../../libs/poco/include/Poco/AtomicCounter.h \
  ../../../libs/poco/include/Poco/Thread.h \
  ../../../libs/poco/include/Poco/Thread_POSIX.h \
  ../../../libs/poco/include/Poco/Runnable.h \
@@ -33,7 +34,6 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../libs/poco/include/Poco/Event.h \
  ../../../libs/poco/include/Poco/Event_POSIX.h \
  ../../../libs/poco/include/Poco/RefCountedObject.h \
- ../../../libs/poco/include/Poco/AtomicCounter.h \
  ../../../libs/poco/include/Poco/AutoPtr.h \
  ../../../libs/openFrameworks/utils/ofURLFileLoader.h \
  ../../../libs/openFrameworks/events/ofEvents.h \
@@ -135,11 +135,18 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../libs/openFrameworks/3d/of3dPrimitives.h \
  ../../../libs/openFrameworks/gl/ofMaterial.h \
  ../../../libs/openFrameworks/gl/ofShader.h \
+ ../../../libs/poco/include/Poco/RegularExpression.h \
  ../../../libs/openFrameworks/app/ofAppBaseWindow.h \
  ../../../libs/openFrameworks/gl/ofGLProgrammableRenderer.h \
- ../../../libs/openFrameworks/graphics/ofImage.h \
+ ../../../libs/openFrameworks/graphics/ofCairoRenderer.h \
+ /usr/include/cairo/cairo-features.h /usr/include/cairo/cairo-pdf.h \
+ /usr/include/cairo/cairo.h /usr/include/cairo/cairo-version.h \
+ /usr/include/cairo/cairo-features.h \
+ /usr/include/cairo/cairo-deprecated.h /usr/include/cairo/cairo-svg.h \
+ /usr/include/cairo/cairo.h \
  ../../../libs/openFrameworks/graphics/ofPath.h \
  ../../../libs/openFrameworks/graphics/ofTessellator.h \
+ ../../../libs/openFrameworks/graphics/ofImage.h \
  ../../../libs/openFrameworks/graphics/ofRendererCollection.h \
  ../../../libs/openFrameworks/graphics/ofTrueTypeFont.h \
  ../../../libs/openFrameworks/app/ofBaseApp.h \
@@ -156,7 +163,7 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../libs/openFrameworks/video/ofVideoGrabber.h \
  ../../../libs/openFrameworks/video/ofGstVideoGrabber.h \
  ../../../libs/openFrameworks/video/ofGstUtils.h \
- /usr/include/gstreamer-0.10/gst/gst.h /usr/include/glib-2.0/glib.h \
+ /usr/include/gstreamer-1.0/gst/gst.h /usr/include/glib-2.0/glib.h \
  /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
  /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h \
  /usr/include/glib-2.0/glib/gmacros.h \
@@ -181,7 +188,7 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  /usr/include/glib-2.0/glib/gfileutils.h \
  /usr/include/glib-2.0/glib/ggettext.h /usr/include/glib-2.0/glib/ghash.h \
  /usr/include/glib-2.0/glib/glist.h /usr/include/glib-2.0/glib/gmem.h \
- /usr/include/glib-2.0/glib/ghmac.h \
+ /usr/include/glib-2.0/glib/gnode.h /usr/include/glib-2.0/glib/ghmac.h \
  /usr/include/glib-2.0/glib/gchecksum.h \
  /usr/include/glib-2.0/glib/ghook.h \
  /usr/include/glib-2.0/glib/ghostutils.h \
@@ -194,7 +201,7 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  /usr/include/glib-2.0/glib/gmappedfile.h \
  /usr/include/glib-2.0/glib/gmarkup.h \
  /usr/include/glib-2.0/glib/gmessages.h \
- /usr/include/glib-2.0/glib/gnode.h /usr/include/glib-2.0/glib/goption.h \
+ /usr/include/glib-2.0/glib/goption.h \
  /usr/include/glib-2.0/glib/gpattern.h \
  /usr/include/glib-2.0/glib/gprimes.h /usr/include/glib-2.0/glib/gqsort.h \
  /usr/include/glib-2.0/glib/gqueue.h /usr/include/glib-2.0/glib/grand.h \
@@ -220,8 +227,8 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  /usr/include/glib-2.0/glib/deprecated/gmain.h \
  /usr/include/glib-2.0/glib/deprecated/grel.h \
  /usr/include/glib-2.0/glib/deprecated/gthread.h \
- /usr/include/gstreamer-0.10/gst/glib-compat.h \
- /usr/include/gstreamer-0.10/gst/gstenumtypes.h \
+ /usr/include/gstreamer-1.0/gst/glib-compat.h \
+ /usr/include/gstreamer-1.0/gst/gstenumtypes.h \
  /usr/include/glib-2.0/glib-object.h \
  /usr/include/glib-2.0/gobject/gbinding.h \
  /usr/include/glib-2.0/gobject/gobject.h \
@@ -240,61 +247,65 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  /usr/include/glib-2.0/gobject/gtypeplugin.h \
  /usr/include/glib-2.0/gobject/gvaluearray.h \
  /usr/include/glib-2.0/gobject/gvaluetypes.h \
- /usr/include/gstreamer-0.10/gst/gstversion.h \
- /usr/include/gstreamer-0.10/gst/gstatomicqueue.h \
- /usr/include/gstreamer-0.10/gst/gstbin.h \
- /usr/include/gstreamer-0.10/gst/gstelement.h \
- /usr/include/gstreamer-0.10/gst/gstconfig.h \
- /usr/include/gstreamer-0.10/gst/gstobject.h \
- /usr/include/gstreamer-0.10/gst/gstpad.h \
- /usr/include/gstreamer-0.10/gst/gstbuffer.h \
- /usr/include/gstreamer-0.10/gst/gstminiobject.h \
- /usr/include/gstreamer-0.10/gst/gstclock.h \
- /usr/include/gstreamer-0.10/gst/gstcaps.h \
- /usr/include/gstreamer-0.10/gst/gststructure.h \
- /usr/include/gstreamer-0.10/gst/gstdatetime.h \
- /usr/include/gstreamer-0.10/gst/gstbufferlist.h \
- /usr/include/gstreamer-0.10/gst/gstevent.h \
- /usr/include/gstreamer-0.10/gst/gstformat.h \
- /usr/include/gstreamer-0.10/gst/gstiterator.h \
- /usr/include/gstreamer-0.10/gst/gsttaglist.h \
- /usr/include/gstreamer-0.10/gst/gstquery.h \
- /usr/include/gstreamer-0.10/gst/gsttask.h \
- /usr/include/gstreamer-0.10/gst/gsttaskpool.h \
- /usr/include/gstreamer-0.10/gst/gstpadtemplate.h \
- /usr/include/gstreamer-0.10/gst/gstbus.h \
- /usr/include/gstreamer-0.10/gst/gstmessage.h \
- /usr/include/gstreamer-0.10/gst/gstelementfactory.h \
- /usr/include/gstreamer-0.10/gst/gstplugin.h \
- /usr/include/glib-2.0/gmodule.h \
- /usr/include/gstreamer-0.10/gst/gstmacros.h \
- /usr/include/gstreamer-0.10/gst/gstpluginfeature.h \
- /usr/include/gstreamer-0.10/gst/gstindex.h \
- /usr/include/gstreamer-0.10/gst/gstindexfactory.h \
- /usr/include/gstreamer-0.10/gst/gstchildproxy.h \
- /usr/include/gstreamer-0.10/gst/gstdebugutils.h \
- /usr/include/gstreamer-0.10/gst/gsterror.h \
- /usr/include/gstreamer-0.10/gst/gstghostpad.h \
- /usr/include/gstreamer-0.10/gst/gstinfo.h \
- /usr/include/gstreamer-0.10/gst/gstinterface.h \
- /usr/include/gstreamer-0.10/gst/gstmarshal.h \
- /usr/include/gstreamer-0.10/gst/gstparamspecs.h \
- /usr/include/gstreamer-0.10/gst/gstvalue.h \
- /usr/include/gstreamer-0.10/gst/gstpipeline.h \
- /usr/include/gstreamer-0.10/gst/gstpoll.h \
- /usr/include/gstreamer-0.10/gst/gstpreset.h \
- /usr/include/gstreamer-0.10/gst/gstregistry.h \
- /usr/include/gstreamer-0.10/gst/gstsegment.h \
- /usr/include/gstreamer-0.10/gst/gstsystemclock.h \
- /usr/include/gstreamer-0.10/gst/gsttagsetter.h \
- /usr/include/gstreamer-0.10/gst/gsttrace.h \
- /usr/include/gstreamer-0.10/gst/gsttypefind.h \
- /usr/include/gstreamer-0.10/gst/gsttypefindfactory.h \
- /usr/include/gstreamer-0.10/gst/gsturi.h \
- /usr/include/gstreamer-0.10/gst/gstutils.h \
- /usr/include/gstreamer-0.10/gst/gstparse.h \
- /usr/include/gstreamer-0.10/gst/gstxml.h \
- /usr/include/gstreamer-0.10/gst/gstcompat.h \
+ /usr/include/gstreamer-1.0/gst/gstversion.h \
+ /usr/include/gstreamer-1.0/gst/gstbin.h \
+ /usr/include/gstreamer-1.0/gst/gstelement.h \
+ /usr/include/gstreamer-1.0/gst/gstconfig.h \
+ /usr/include/gstreamer-1.0/gst/gstobject.h \
+ /usr/include/gstreamer-1.0/gst/gstcontrolbinding.h \
+ /usr/include/gstreamer-1.0/gst/gstcontrolsource.h \
+ /usr/include/gstreamer-1.0/gst/gstclock.h \
+ /usr/include/gstreamer-1.0/gst/gstpad.h \
+ /usr/include/gstreamer-1.0/gst/gstbuffer.h \
+ /usr/include/gstreamer-1.0/gst/gstminiobject.h \
+ /usr/include/gstreamer-1.0/gst/gstallocator.h \
+ /usr/include/gstreamer-1.0/gst/gstmemory.h \
+ /usr/include/gstreamer-1.0/gst/gstmeta.h \
+ /usr/include/gstreamer-1.0/gst/gstbufferlist.h \
+ /usr/include/gstreamer-1.0/gst/gstcaps.h \
+ /usr/include/gstreamer-1.0/gst/gststructure.h \
+ /usr/include/gstreamer-1.0/gst/gstdatetime.h \
+ /usr/include/gstreamer-1.0/gst/gstcapsfeatures.h \
+ /usr/include/gstreamer-1.0/gst/gstpadtemplate.h \
+ /usr/include/gstreamer-1.0/gst/gstevent.h \
+ /usr/include/gstreamer-1.0/gst/gstformat.h \
+ /usr/include/gstreamer-1.0/gst/gstiterator.h \
+ /usr/include/gstreamer-1.0/gst/gsttaglist.h \
+ /usr/include/gstreamer-1.0/gst/gstsample.h \
+ /usr/include/gstreamer-1.0/gst/gstsegment.h \
+ /usr/include/gstreamer-1.0/gst/gstmessage.h \
+ /usr/include/gstreamer-1.0/gst/gstquery.h \
+ /usr/include/gstreamer-1.0/gst/gsttoc.h \
+ /usr/include/gstreamer-1.0/gst/gstcontext.h \
+ /usr/include/gstreamer-1.0/gst/gsttask.h \
+ /usr/include/gstreamer-1.0/gst/gsttaskpool.h \
+ /usr/include/gstreamer-1.0/gst/gstbus.h \
+ /usr/include/gstreamer-1.0/gst/gstelementfactory.h \
+ /usr/include/gstreamer-1.0/gst/gstplugin.h \
+ /usr/include/gstreamer-1.0/gst/gstmacros.h \
+ /usr/include/gstreamer-1.0/gst/gstpluginfeature.h \
+ /usr/include/gstreamer-1.0/gst/gsturi.h \
+ /usr/include/gstreamer-1.0/gst/gstbufferpool.h \
+ /usr/include/gstreamer-1.0/gst/gstchildproxy.h \
+ /usr/include/gstreamer-1.0/gst/gstdebugutils.h \
+ /usr/include/gstreamer-1.0/gst/gstelementmetadata.h \
+ /usr/include/gstreamer-1.0/gst/gsterror.h \
+ /usr/include/gstreamer-1.0/gst/gstghostpad.h \
+ /usr/include/gstreamer-1.0/gst/gstinfo.h \
+ /usr/include/gstreamer-1.0/gst/gstparamspecs.h \
+ /usr/include/gstreamer-1.0/gst/gstvalue.h \
+ /usr/include/gstreamer-1.0/gst/gstpipeline.h \
+ /usr/include/gstreamer-1.0/gst/gstpoll.h \
+ /usr/include/gstreamer-1.0/gst/gstpreset.h \
+ /usr/include/gstreamer-1.0/gst/gstregistry.h \
+ /usr/include/gstreamer-1.0/gst/gstsystemclock.h \
+ /usr/include/gstreamer-1.0/gst/gsttagsetter.h \
+ /usr/include/gstreamer-1.0/gst/gsttocsetter.h \
+ /usr/include/gstreamer-1.0/gst/gsttypefind.h \
+ /usr/include/gstreamer-1.0/gst/gsttypefindfactory.h \
+ /usr/include/gstreamer-1.0/gst/gstutils.h \
+ /usr/include/gstreamer-1.0/gst/gstparse.h \
+ /usr/include/gstreamer-1.0/gst/gstcompat.h \
  ../../../libs/openFrameworks/video/ofVideoPlayer.h \
  ../../../libs/openFrameworks/video/ofGstVideoPlayer.h \
  ../../../libs/openFrameworks/3d/ofCamera.h \
@@ -358,10 +369,36 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../addons/ofxOpenCv/src/ofxCvShortImage.h \
  ../../../addons/ofxOpenCv/src/ofxCvContourFinder.h \
  ../../../addons/ofxOpenCv/src/ofxCvHaarFinder.h \
+ ../../../addons/ofxCv/src/ofxCv.h \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/opencv.hpp \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/video.hpp \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/background_segm.hpp \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ml/ml.hpp \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui/highgui_c.h \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui/highgui.hpp \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib/contrib.hpp \
+ ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib/retina.hpp \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Utilities.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Wrappers.h \
+ ../../../addons/ofxCv/libs/CLD/include/CLD/imatrix.h \
+ ../../../addons/ofxCv/libs/CLD/include/CLD/ETF.h \
+ ../../../addons/ofxCv/libs/CLD/include/CLD/imatrix.h \
+ ../../../addons/ofxCv/libs/CLD/include/CLD/fdog.h \
+ ../../../addons/ofxCv/libs/CLD/include/CLD/myvec.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Helpers.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Distance.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Calibration.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Tracker.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/ContourFinder.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/RunningBackground.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Flow.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/ObjectFinder.h \
+ ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Kalman.h \
  ../../../addons/ofxKinect/src/ofxKinect.h \
  ../../../addons/ofxKinect/libs/libfreenect/include/libfreenect.h \
+ /usr/include/libusb-1.0/libusb.h \
  ../../../addons/ofxKinect/src/ofxBase3DVideo.h \
- /usr/include/libusb-1.0/libusb.h ../../../addons/ofxOsc/src/ofxOsc.h \
+ ../../../addons/ofxOsc/src/ofxOsc.h \
  ../../../addons/ofxOsc/src/ofxOscArg.h \
  ../../../addons/ofxOsc/src/ofxOscMessage.h \
  ../../../addons/ofxOsc/src/ofxOscSender.h \
@@ -398,7 +435,8 @@ obj/linux64/Release/src/testApp.o: src/testApp.cpp src/testApp.h \
  ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiToggle.h \
  ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiTitle.h \
  ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiColorPicker.h \
- ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiComboBox.h
+ ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiComboBox.h \
+ src/corners.h src/intercept.h src/BallTracker.h src/AutoConfigurator.h
 
 src/testApp.h:
 
@@ -456,6 +494,8 @@ src/testApp.h:
 
 ../../../libs/openFrameworks/utils/ofThread.h:
 
+../../../libs/poco/include/Poco/AtomicCounter.h:
+
 ../../../libs/poco/include/Poco/Thread.h:
 
 ../../../libs/poco/include/Poco/Thread_POSIX.h:
@@ -469,8 +509,6 @@ src/testApp.h:
 ../../../libs/poco/include/Poco/Event_POSIX.h:
 
 ../../../libs/poco/include/Poco/RefCountedObject.h:
-
-../../../libs/poco/include/Poco/AtomicCounter.h:
 
 ../../../libs/poco/include/Poco/AutoPtr.h:
 
@@ -674,15 +712,35 @@ src/testApp.h:
 
 ../../../libs/openFrameworks/gl/ofShader.h:
 
+../../../libs/poco/include/Poco/RegularExpression.h:
+
 ../../../libs/openFrameworks/app/ofAppBaseWindow.h:
 
 ../../../libs/openFrameworks/gl/ofGLProgrammableRenderer.h:
 
-../../../libs/openFrameworks/graphics/ofImage.h:
+../../../libs/openFrameworks/graphics/ofCairoRenderer.h:
+
+/usr/include/cairo/cairo-features.h:
+
+/usr/include/cairo/cairo-pdf.h:
+
+/usr/include/cairo/cairo.h:
+
+/usr/include/cairo/cairo-version.h:
+
+/usr/include/cairo/cairo-features.h:
+
+/usr/include/cairo/cairo-deprecated.h:
+
+/usr/include/cairo/cairo-svg.h:
+
+/usr/include/cairo/cairo.h:
 
 ../../../libs/openFrameworks/graphics/ofPath.h:
 
 ../../../libs/openFrameworks/graphics/ofTessellator.h:
+
+../../../libs/openFrameworks/graphics/ofImage.h:
 
 ../../../libs/openFrameworks/graphics/ofRendererCollection.h:
 
@@ -716,7 +774,7 @@ src/testApp.h:
 
 ../../../libs/openFrameworks/video/ofGstUtils.h:
 
-/usr/include/gstreamer-0.10/gst/gst.h:
+/usr/include/gstreamer-1.0/gst/gst.h:
 
 /usr/include/glib-2.0/glib.h:
 
@@ -780,6 +838,8 @@ src/testApp.h:
 
 /usr/include/glib-2.0/glib/gmem.h:
 
+/usr/include/glib-2.0/glib/gnode.h:
+
 /usr/include/glib-2.0/glib/ghmac.h:
 
 /usr/include/glib-2.0/glib/gchecksum.h:
@@ -809,8 +869,6 @@ src/testApp.h:
 /usr/include/glib-2.0/glib/gmarkup.h:
 
 /usr/include/glib-2.0/glib/gmessages.h:
-
-/usr/include/glib-2.0/glib/gnode.h:
 
 /usr/include/glib-2.0/glib/goption.h:
 
@@ -870,9 +928,9 @@ src/testApp.h:
 
 /usr/include/glib-2.0/glib/deprecated/gthread.h:
 
-/usr/include/gstreamer-0.10/gst/glib-compat.h:
+/usr/include/gstreamer-1.0/gst/glib-compat.h:
 
-/usr/include/gstreamer-0.10/gst/gstenumtypes.h:
+/usr/include/gstreamer-1.0/gst/gstenumtypes.h:
 
 /usr/include/glib-2.0/glib-object.h:
 
@@ -910,115 +968,123 @@ src/testApp.h:
 
 /usr/include/glib-2.0/gobject/gvaluetypes.h:
 
-/usr/include/gstreamer-0.10/gst/gstversion.h:
+/usr/include/gstreamer-1.0/gst/gstversion.h:
 
-/usr/include/gstreamer-0.10/gst/gstatomicqueue.h:
+/usr/include/gstreamer-1.0/gst/gstbin.h:
 
-/usr/include/gstreamer-0.10/gst/gstbin.h:
+/usr/include/gstreamer-1.0/gst/gstelement.h:
 
-/usr/include/gstreamer-0.10/gst/gstelement.h:
+/usr/include/gstreamer-1.0/gst/gstconfig.h:
 
-/usr/include/gstreamer-0.10/gst/gstconfig.h:
+/usr/include/gstreamer-1.0/gst/gstobject.h:
 
-/usr/include/gstreamer-0.10/gst/gstobject.h:
+/usr/include/gstreamer-1.0/gst/gstcontrolbinding.h:
 
-/usr/include/gstreamer-0.10/gst/gstpad.h:
+/usr/include/gstreamer-1.0/gst/gstcontrolsource.h:
 
-/usr/include/gstreamer-0.10/gst/gstbuffer.h:
+/usr/include/gstreamer-1.0/gst/gstclock.h:
 
-/usr/include/gstreamer-0.10/gst/gstminiobject.h:
+/usr/include/gstreamer-1.0/gst/gstpad.h:
 
-/usr/include/gstreamer-0.10/gst/gstclock.h:
+/usr/include/gstreamer-1.0/gst/gstbuffer.h:
 
-/usr/include/gstreamer-0.10/gst/gstcaps.h:
+/usr/include/gstreamer-1.0/gst/gstminiobject.h:
 
-/usr/include/gstreamer-0.10/gst/gststructure.h:
+/usr/include/gstreamer-1.0/gst/gstallocator.h:
 
-/usr/include/gstreamer-0.10/gst/gstdatetime.h:
+/usr/include/gstreamer-1.0/gst/gstmemory.h:
 
-/usr/include/gstreamer-0.10/gst/gstbufferlist.h:
+/usr/include/gstreamer-1.0/gst/gstmeta.h:
 
-/usr/include/gstreamer-0.10/gst/gstevent.h:
+/usr/include/gstreamer-1.0/gst/gstbufferlist.h:
 
-/usr/include/gstreamer-0.10/gst/gstformat.h:
+/usr/include/gstreamer-1.0/gst/gstcaps.h:
 
-/usr/include/gstreamer-0.10/gst/gstiterator.h:
+/usr/include/gstreamer-1.0/gst/gststructure.h:
 
-/usr/include/gstreamer-0.10/gst/gsttaglist.h:
+/usr/include/gstreamer-1.0/gst/gstdatetime.h:
 
-/usr/include/gstreamer-0.10/gst/gstquery.h:
+/usr/include/gstreamer-1.0/gst/gstcapsfeatures.h:
 
-/usr/include/gstreamer-0.10/gst/gsttask.h:
+/usr/include/gstreamer-1.0/gst/gstpadtemplate.h:
 
-/usr/include/gstreamer-0.10/gst/gsttaskpool.h:
+/usr/include/gstreamer-1.0/gst/gstevent.h:
 
-/usr/include/gstreamer-0.10/gst/gstpadtemplate.h:
+/usr/include/gstreamer-1.0/gst/gstformat.h:
 
-/usr/include/gstreamer-0.10/gst/gstbus.h:
+/usr/include/gstreamer-1.0/gst/gstiterator.h:
 
-/usr/include/gstreamer-0.10/gst/gstmessage.h:
+/usr/include/gstreamer-1.0/gst/gsttaglist.h:
 
-/usr/include/gstreamer-0.10/gst/gstelementfactory.h:
+/usr/include/gstreamer-1.0/gst/gstsample.h:
 
-/usr/include/gstreamer-0.10/gst/gstplugin.h:
+/usr/include/gstreamer-1.0/gst/gstsegment.h:
 
-/usr/include/glib-2.0/gmodule.h:
+/usr/include/gstreamer-1.0/gst/gstmessage.h:
 
-/usr/include/gstreamer-0.10/gst/gstmacros.h:
+/usr/include/gstreamer-1.0/gst/gstquery.h:
 
-/usr/include/gstreamer-0.10/gst/gstpluginfeature.h:
+/usr/include/gstreamer-1.0/gst/gsttoc.h:
 
-/usr/include/gstreamer-0.10/gst/gstindex.h:
+/usr/include/gstreamer-1.0/gst/gstcontext.h:
 
-/usr/include/gstreamer-0.10/gst/gstindexfactory.h:
+/usr/include/gstreamer-1.0/gst/gsttask.h:
 
-/usr/include/gstreamer-0.10/gst/gstchildproxy.h:
+/usr/include/gstreamer-1.0/gst/gsttaskpool.h:
 
-/usr/include/gstreamer-0.10/gst/gstdebugutils.h:
+/usr/include/gstreamer-1.0/gst/gstbus.h:
 
-/usr/include/gstreamer-0.10/gst/gsterror.h:
+/usr/include/gstreamer-1.0/gst/gstelementfactory.h:
 
-/usr/include/gstreamer-0.10/gst/gstghostpad.h:
+/usr/include/gstreamer-1.0/gst/gstplugin.h:
 
-/usr/include/gstreamer-0.10/gst/gstinfo.h:
+/usr/include/gstreamer-1.0/gst/gstmacros.h:
 
-/usr/include/gstreamer-0.10/gst/gstinterface.h:
+/usr/include/gstreamer-1.0/gst/gstpluginfeature.h:
 
-/usr/include/gstreamer-0.10/gst/gstmarshal.h:
+/usr/include/gstreamer-1.0/gst/gsturi.h:
 
-/usr/include/gstreamer-0.10/gst/gstparamspecs.h:
+/usr/include/gstreamer-1.0/gst/gstbufferpool.h:
 
-/usr/include/gstreamer-0.10/gst/gstvalue.h:
+/usr/include/gstreamer-1.0/gst/gstchildproxy.h:
 
-/usr/include/gstreamer-0.10/gst/gstpipeline.h:
+/usr/include/gstreamer-1.0/gst/gstdebugutils.h:
 
-/usr/include/gstreamer-0.10/gst/gstpoll.h:
+/usr/include/gstreamer-1.0/gst/gstelementmetadata.h:
 
-/usr/include/gstreamer-0.10/gst/gstpreset.h:
+/usr/include/gstreamer-1.0/gst/gsterror.h:
 
-/usr/include/gstreamer-0.10/gst/gstregistry.h:
+/usr/include/gstreamer-1.0/gst/gstghostpad.h:
 
-/usr/include/gstreamer-0.10/gst/gstsegment.h:
+/usr/include/gstreamer-1.0/gst/gstinfo.h:
 
-/usr/include/gstreamer-0.10/gst/gstsystemclock.h:
+/usr/include/gstreamer-1.0/gst/gstparamspecs.h:
 
-/usr/include/gstreamer-0.10/gst/gsttagsetter.h:
+/usr/include/gstreamer-1.0/gst/gstvalue.h:
 
-/usr/include/gstreamer-0.10/gst/gsttrace.h:
+/usr/include/gstreamer-1.0/gst/gstpipeline.h:
 
-/usr/include/gstreamer-0.10/gst/gsttypefind.h:
+/usr/include/gstreamer-1.0/gst/gstpoll.h:
 
-/usr/include/gstreamer-0.10/gst/gsttypefindfactory.h:
+/usr/include/gstreamer-1.0/gst/gstpreset.h:
 
-/usr/include/gstreamer-0.10/gst/gsturi.h:
+/usr/include/gstreamer-1.0/gst/gstregistry.h:
 
-/usr/include/gstreamer-0.10/gst/gstutils.h:
+/usr/include/gstreamer-1.0/gst/gstsystemclock.h:
 
-/usr/include/gstreamer-0.10/gst/gstparse.h:
+/usr/include/gstreamer-1.0/gst/gsttagsetter.h:
 
-/usr/include/gstreamer-0.10/gst/gstxml.h:
+/usr/include/gstreamer-1.0/gst/gsttocsetter.h:
 
-/usr/include/gstreamer-0.10/gst/gstcompat.h:
+/usr/include/gstreamer-1.0/gst/gsttypefind.h:
+
+/usr/include/gstreamer-1.0/gst/gsttypefindfactory.h:
+
+/usr/include/gstreamer-1.0/gst/gstutils.h:
+
+/usr/include/gstreamer-1.0/gst/gstparse.h:
+
+/usr/include/gstreamer-1.0/gst/gstcompat.h:
 
 ../../../libs/openFrameworks/video/ofVideoPlayer.h:
 
@@ -1146,13 +1212,63 @@ src/testApp.h:
 
 ../../../addons/ofxOpenCv/src/ofxCvHaarFinder.h:
 
+../../../addons/ofxCv/src/ofxCv.h:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/opencv.hpp:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/video.hpp:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/background_segm.hpp:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/ml/ml.hpp:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui/highgui_c.h:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui/highgui.hpp:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib/contrib.hpp:
+
+../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib/retina.hpp:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Utilities.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Wrappers.h:
+
+../../../addons/ofxCv/libs/CLD/include/CLD/imatrix.h:
+
+../../../addons/ofxCv/libs/CLD/include/CLD/ETF.h:
+
+../../../addons/ofxCv/libs/CLD/include/CLD/imatrix.h:
+
+../../../addons/ofxCv/libs/CLD/include/CLD/fdog.h:
+
+../../../addons/ofxCv/libs/CLD/include/CLD/myvec.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Helpers.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Distance.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Calibration.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Tracker.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/ContourFinder.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/RunningBackground.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Flow.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/ObjectFinder.h:
+
+../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Kalman.h:
+
 ../../../addons/ofxKinect/src/ofxKinect.h:
 
 ../../../addons/ofxKinect/libs/libfreenect/include/libfreenect.h:
 
-../../../addons/ofxKinect/src/ofxBase3DVideo.h:
-
 /usr/include/libusb-1.0/libusb.h:
+
+../../../addons/ofxKinect/src/ofxBase3DVideo.h:
 
 ../../../addons/ofxOsc/src/ofxOsc.h:
 
@@ -1229,3 +1345,11 @@ src/testApp.h:
 ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiColorPicker.h:
 
 ../../../addons/ofxSimpleGuiToo/src/Controls/ofxSimpleGuiComboBox.h:
+
+src/corners.h:
+
+src/intercept.h:
+
+src/BallTracker.h:
+
+src/AutoConfigurator.h:

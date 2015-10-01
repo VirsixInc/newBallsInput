@@ -68,32 +68,35 @@ void testApp::setup() {
     gui.addSlider("configThreshold", configThreshold, 0, 255);
     gui.addSlider("Depth Thresh", depthThresh, 0, 255);
     gui.addSlider("Range", range, 0, 80);
-    gui.addSlider("minContArea", minContArea, 0, 1000);
-    gui.addSlider("maxContArea", maxContArea, 0, 2000);
+//    gui.addSlider("minContArea", minContArea, 0, 1000);
+//    gui.addSlider("maxContArea", maxContArea, 0, 2000);
 //    gui.addSlider("minPartEffect", minPartEffect, 0, 10000);
 //    gui.addSlider("maxPartEffect", maxPartEffect, 0, 20000);
 //    gui.addSlider("minVaryDist", minVariationDistance, 0.01, 1000.0);
-    //gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
+//    gui.addSlider("velSmoothRate", velSmoothRate, 0.0, 1.0);
 //    gui.addSlider("lifeTime", lifeTime, 0, 150);
-    gui.addToggle("Configured", configured);
+    gui.addSlider("colorSamples", colorSamples, 0, 4);
+//    gui.addToggle("Configured", configured);
     gui.addToggle("Save Background", saveBk);
-//    gui.addToggle("Flip", flip);
+    gui.addToggle("Flip", flip);
     gui.setAlignRight(true);
 //    gui.config->fullColor = 
     gui.loadFromXML();
-    
+
     velSmoothRate = 0.775f; //Hardcoding for production version. Values still changeable
+    minContArea = 260;
+    maxContArea = 1260;
+    minVariationDistance = 65.0f;
     lifeTime = 19;
-    minVariationDistance = 75.0f;
-    flip = true;
-    
-    ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate);
+    configured = true;
+
+    ballTracker.init(&lifeTime, &minVariationDistance, &minContArea, &maxContArea, &velSmoothRate, &colorSamples);
 
 //    partEffectFinder.setTargetColor(ofColor::white, ofxCv::TRACK_COLOR_RGB);
     
     autoConfigurator.init(camWidth, camHeight, &configThreshold);
-    
-    SendMessage("/config/start");
+    needsConfiguring = true;
+    //SendMessage("/config/start");
     kinectTimeout = 0;
 }
 
@@ -103,6 +106,11 @@ void testApp::update() {
     
     kinect.update();
     if(kinect.isFrameNew()) {
+	if(needsConfiguring) {
+		ofLogNotice("started");
+		SendMessage("config/start");
+		needsConfiguring = false;
+	}
         kinectTimeout = 0;
 //        partEffectFinder.setMinArea(minPartEffect);
 //        partEffectFinder.setMaxArea(maxPartEffect);
@@ -330,8 +338,7 @@ void testApp::CheckOSCMessage() {
         if(receiver.getNextMessage(&m)) {
             string addr = m.getAddress();
             if(addr == "/config/start") {
-//                if(autoConfigurator.isConfigured())
-                    autoConfigurator.reconfigure();
+                autoConfigurator.reconfigure();
             }
         }
     }
@@ -378,11 +385,6 @@ void testApp::keyPressed (int key) {
 //        case OF_KEY_F1:
 //            autoConfigurator.configDone = true;
 //            break;
-        case 'c':
-            SendMessage("/config/start");
-            autoConfigurator.reconfigure();
-            break;
-        
     }
 }
 

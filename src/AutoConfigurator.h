@@ -6,7 +6,7 @@
 #include "ofxCv.h"
 #include "corners.h"
 
-const unsigned int FRONT_END_DELAY_TIME = 20;
+const unsigned int FRONT_END_DELAY_TIME = 60;
 //const unsigned int RECONFIGURE_TIME = 3600;
 
 class AutoConfigurator {
