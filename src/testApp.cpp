@@ -1,4 +1,5 @@
 #include "testApp.h"
+#include <cstdlib>
 
 const int depthImageAverageTime = 20;
 
@@ -51,16 +52,17 @@ void testApp::setup() {
 #if __linux__
     ofLogNotice("Linux OS. Moving _settings.xml");
 
+    string settingsPath = std::getenv("HOME") + "/_settings.xml";
     ofFile f;
-    if(false == f.doesFileExist("/home/dodgeball/_settings.xml", false)) {
+    if(false == f.doesFileExist(settingsPath, false)) {
         f.open("_settings.xml");
-        f.copyTo("/home/dodgeball/_settings.xml", false);
+        f.copyTo(settingsPath, false);
     }
     
     gui.setup();
     vector<ofxSimpleGuiPage *> pages = gui.getPages();
     for(int i = 0; i < pages.size(); i++) {
-        gui.page(i).setXMLName("/home/dodgeball/_settings.xml");
+        gui.page(i).setXMLName(settingsPath);
     }
     
 #endif
