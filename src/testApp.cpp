@@ -52,7 +52,7 @@ void testApp::setup() {
 #if __linux__
     ofLogNotice("Linux OS. Moving _settings.xml");
 
-    string settingsPath = std::getenv("HOME") + "/_settings.xml";
+    string settingsPath = std::string(std::getenv("HOME")) + "/_settings.xml";
     ofFile f;
     if(false == f.doesFileExist(settingsPath, false)) {
         f.open("_settings.xml");
